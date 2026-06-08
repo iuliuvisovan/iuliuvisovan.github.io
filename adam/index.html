@@ -147,9 +147,9 @@
       -webkit-user-select: none;
       font-family: "Fredoka", sans-serif;
       letter-spacing: normal;
-      font-weight: 500;
+      font-weight: 400;
       font-size: 1em;
-      color: #964e11;
+      color: #b86824;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       transition: all var(--anim--hover-time) var(--anim--hover-ease);
@@ -157,19 +157,21 @@
       padding-block: 0.875em;
     }
 
-    /* Gradient text fill, with the shadow on its own layer (behind the glyphs) */
+    /* Gradient text fill; shadow on its own layer so it stays behind the glyphs */
     button span i {
       font-style: normal;
-      background: linear-gradient(180deg, #fdf6ee 0%, #c47e44 50%, #964e11 100%);
+      background: linear-gradient(90deg, #964e11 0%, #b86824 50%, #964e11 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0.13em 0.05em rgba(0, 0, 0, 0.3));
+      filter: drop-shadow(0 0.25em 0.04em rgba(0, 0, 0, 0.12))
+        drop-shadow(0 0 0.04em rgba(255, 255, 255, 0.55));
       transition: filter var(--anim--hover-time) var(--anim--hover-ease);
     }
 
     button:hover span i {
-      filter: drop-shadow(0.03em 0.05em 0.04em rgba(0, 0, 0, 0.3));
+      filter: drop-shadow(0.025em 0.025em 0.03em rgba(0, 0, 0, 0.14))
+        drop-shadow(0 0 0.04em rgba(255, 255, 255, 0.55));
     }
 
     /* Text */
@@ -304,7 +306,8 @@
     }
 
     .button-wrap:has(button:active) span i {
-      filter: drop-shadow(0.03em 0.15em 0.05em rgba(0, 0, 0, 0.3));
+      filter: drop-shadow(0.025em 0.25em 0.05em rgba(0, 0, 0, 0.14))
+        drop-shadow(0 0 0.04em rgba(255, 255, 255, 0.55));
     }
   </style>
 </head>
