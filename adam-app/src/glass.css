@@ -150,8 +150,18 @@ button span {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  padding-inline: 1em;
-  padding-block: 0.875em;
+  padding-inline: 0.7em;
+  padding-block: 0.55em;
+}
+
+/* Image label on the button face */
+.button-image {
+  display: block;
+  height: 3.57em;
+  width: auto;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Gradient text fill; shadow on its own layer so it stays behind the glyphs */

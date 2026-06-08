@@ -12,7 +12,7 @@ export default function GlassButton({ children, onClick }: Props) {
   return (
     <div className="button-wrap">
       <button onClick={onClick}>
-        <span><i>{children}</i></span>
+        <span>{children}</span>
       </button>
       <div className="button-shadow"></div>
     </div>
