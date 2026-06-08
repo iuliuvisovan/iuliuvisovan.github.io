@@ -228,11 +228,11 @@ button::after {
   box-sizing: border-box;
   background: conic-gradient(
       from var(--angle-1) at 50% 50%,
-      rgba(150, 78, 17, 0.5),
-      rgba(150, 78, 17, 0) 5% 40%,
-      rgba(150, 78, 17, 0.5) 50%,
-      rgba(150, 78, 17, 0) 60% 95%,
-      rgba(150, 78, 17, 0.5)
+      rgba(226, 124, 63, 0.5),
+      rgba(226, 124, 63, 0) 5% 40%,
+      rgba(203, 137, 84, 0.5) 50%,
+      rgba(203, 137, 84, 0) 60% 95%,
+      rgba(226, 124, 63, 0.5)
     ),
     linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -243,7 +243,7 @@ button::after {
 }
 
 button:hover::after {
-  --angle-1: -125deg;
+  --angle-1: -115deg;
 }
 
 button:active::after {
