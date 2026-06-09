@@ -264,7 +264,7 @@ button::after {
 }
 
 button:hover::after {
-  --angle-1: -115deg;
+  --angle-1: -131deg;
 }
 
 button:active::after {
