@@ -3,14 +3,15 @@ import type { ReactNode } from 'react'
 type Props = {
   children: ReactNode
   onClick?: () => void
+  // When true, the glass stretches to fill its parent (used for the flip's
+  // back face so both faces share the front's size). Default auto-sizes.
+  fill?: boolean
 }
 
-// Liquid-glass button (Petr-Knoll "Glass Button"). The text sits in <span><i>
-// so the gradient fill (background-clip: text on <i>) and its drop-shadow live
-// on their own layer, keeping the shadow behind the glyphs. Styles in glass.css.
-export default function GlassButton({ children, onClick }: Props) {
+// Liquid-glass button (Petr-Knoll "Glass Button"). Styles live in glass.css.
+export default function GlassButton({ children, onClick, fill }: Props) {
   return (
-    <div className="button-wrap">
+    <div className={fill ? 'button-wrap button-wrap--fill' : 'button-wrap'}>
       <button onClick={onClick}>
         <span>{children}</span>
       </button>

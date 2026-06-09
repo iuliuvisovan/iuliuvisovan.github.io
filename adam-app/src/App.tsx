@@ -14,35 +14,48 @@ As the night grew deep, the moonbeam gently brought Adam back to his cozy meadow
 
 And with that, little Adam drifted off to sleep, dreaming of his starry adventures.`
 
+// front  -> the image button
+// loading-> flipped to the back, "Once upon a time…" with animated dots
+// story  -> rotated again + scaled, the story unrolls as a tilted scroll
+type Phase = 'front' | 'loading' | 'story'
+
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 export default function App() {
-  const [loading, setLoading] = useState(false)
+  const [phase, setPhase] = useState<Phase>('front')
   const [story, setStory] = useState('')
 
   async function tellStory() {
-    if (loading) {
+    if (phase === 'loading') {
       return
     }
-    setLoading(true)
     setStory('')
-    await delay(1500)
+    setPhase('loading')
+    await delay(3000)
     setStory(MOCK_STORY)
-    setLoading(false)
+    setPhase('story')
   }
 
   return (
-    <>
-      <GlassButton onClick={tellStory}>
-        {loading ? (
-          <i>Once upon a time…</i>
-        ) : (
-          <img className="button-image" src={tellMe} alt="Tell me a story" />
-        )}
-      </GlassButton>
-      {story && <div className="story">{story}</div>}
-    </>
+    <div className="scene">
+      <div className="flip" data-phase={phase}>
+        <div className="flip-face flip-face--front">
+          <GlassButton onClick={tellStory}>
+            <img className="button-image" src={tellMe} alt="Tell me a story" />
+          </GlassButton>
+        </div>
+        <div className="flip-face flip-face--back">
+          <GlassButton fill onClick={tellStory}>
+            <i className="loading-text">
+              Once upon a time<span className="dots"></span>
+            </i>
+          </GlassButton>
+        </div>
+      </div>
+
+      {phase === 'story' && <div className="story-scroll">{story}</div>}
+    </div>
   )
 }
