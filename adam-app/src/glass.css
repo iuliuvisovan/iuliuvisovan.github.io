@@ -150,14 +150,14 @@ button span {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  padding-inline: 0.8em;
-  padding-block: 0.6em;
+  padding-inline: calc(0.8em + 4px);
+  padding-block: calc(0.6em + 4px);
 }
 
 /* Image label on the button face */
 .button-image {
   display: block;
-  height: 3.29em;
+  height: 3.62em;
   width: auto;
   /* Nudge down-right 10px to visually center the slightly off-center artwork */
   transform: translate(10px, 10px);
@@ -207,7 +207,7 @@ button span::after {
   mix-blend-mode: screen;
   pointer-events: none;
   background-size: 200% 200%;
-  background-position: 0% 50%;
+  background-position: 7.5% 50%;
   background-repeat: no-repeat;
   transition: background-position calc(var(--anim--hover-time) * 1.25)
       var(--anim--hover-ease),
