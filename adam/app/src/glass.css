@@ -37,14 +37,45 @@ body {
   justify-content: center;
   gap: 2rem;
   font-size: var(--global--size);
-  background-image: url("./assets/bg.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-color: #f4ecdd;
   font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
+}
+
+/* Rocking background: oversized fixed layer pivoting around a point far
+   below the screen, tilting gently like a rocking chair on a wide arc. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -8%;
+  z-index: -1;
+  background-image: url("./assets/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform-origin: 50% 400%;
+  animation: rock 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes rock {
+  0% {
+    transform: rotate(-0.5deg);
+  }
+  50% {
+    transform: rotate(0.5deg);
+  }
+  100% {
+    transform: rotate(-0.5deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
 }
 
 /* ========== BUTTON ========== */
