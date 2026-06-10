@@ -8,7 +8,7 @@ import tellMe from './assets/tellme.png'
 type Phase = 'front' | 'back'
 
 // Delay between typed letters in TypedLine
-const TYPE_INTERVAL_MS = 100
+const TYPE_INTERVAL_MS = 56
 
 const LINE_1 = 'A fost odată...'
 const LINE_2 = 'Ca niciodată...'
