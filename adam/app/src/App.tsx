@@ -55,6 +55,7 @@ function TypedLine({ text, active }: TypedLineProps) {
 
 export default function App() {
   const [phase, setPhase] = useState<Phase>('front')
+  const [face, setFace] = useState<Phase>('front')
   const [line1Active, setLine1Active] = useState(false)
   const [line2Active, setLine2Active] = useState(false)
 
@@ -64,7 +65,11 @@ export default function App() {
     }
     startLullaby()
     setPhase('back')
-    await wait(700)
+    // The CSS flip animation runs 700ms; the faces swap at the 90° edge-on
+    // midpoint (350ms), driven from React so no filled CSS animation lingers.
+    await wait(350)
+    setFace('back')
+    await wait(350)
     setLine1Active(true)
     // Line 1 finishes typing, then an 800ms breath before line 2 starts
     await wait(LINE_1.length * TYPE_INTERVAL_MS + 800)
@@ -73,7 +78,7 @@ export default function App() {
 
   return (
     <div className="scene">
-      <div className="flip" data-phase={phase}>
+      <div className="flip" data-phase={phase} data-face={face}>
         <div className="flip-face flip-face--front">
           <GlassButton onClick={flipCard}>
             <img className="button-image" src={tellMe} alt="Tell me a story" />

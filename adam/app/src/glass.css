@@ -339,8 +339,10 @@ button:hover::after {
 
 /* ========== FACE STAGE ========== */
 /* Single-element rotateX flip: the card rotates edge-on and the faces swap
-   at the 90° midpoint via step animations. perspective() lives inline in the
-   transform — a `perspective` or `preserve-3d` property on ANY ancestor
+   at the 90° midpoint, driven from React state (data-face) — no filled
+   animations remain, so nothing stays composited after the flip and the
+   backdrop-filter can re-render immediately. perspective() lives inline in
+   the transform — a `perspective` or `preserve-3d` property on ANY ancestor
    starts a new backdrop root, which kills the glass button's backdrop-filter
    (it can no longer sample the page background) — keep 3D context off
    ancestors of the glass button. */
@@ -393,48 +395,17 @@ button:hover::after {
 /* visibility: hidden is required on top of opacity: 0 — Chromium keeps
    rendering an element's backdrop-filter even when an ancestor has opacity 0,
    so the hidden face's glass button would ghost through the visible face. */
-.flip[data-phase="front"] .flip-face--back,
-.flip[data-phase="back"] .flip-face--front {
+.flip[data-face="front"] .flip-face--back,
+.flip[data-face="back"] .flip-face--front {
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
-}
-
-/* Faces swap exactly at the edge-on midpoint of the flip rotation. */
-.flip[data-phase="back"] .flip-face--front {
-  animation: face-hide 700ms steps(1, end) both;
-}
-
-.flip[data-phase="back"] .flip-face--back {
-  animation: face-show 700ms steps(1, end) both;
 }
 
 /* Once flipped, the card is inert: no hover/press effects, no pointer cursor.
    pointer-events: none does not affect rendering, so the glass blur stays. */
 .flip[data-phase="back"] .flip-face--back button {
   pointer-events: none;
-}
-
-@keyframes face-hide {
-  0% {
-    opacity: 1;
-    visibility: visible;
-  }
-  50%, 100% {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
-@keyframes face-show {
-  0% {
-    opacity: 0;
-    visibility: hidden;
-  }
-  50%, 100% {
-    opacity: 1;
-    visibility: visible;
-  }
 }
 
 /* Fill mode: glass stretches to its parent instead of hugging content. */
