@@ -249,7 +249,8 @@ button:hover span::after {
   background-position: 25% 50%;
 }
 
-button:active span::after {
+button:active span::after,
+.flip[data-phase="back"] button span::after {
   background-position: 50% 15%;
   --angle-2: -15deg;
 }
@@ -257,7 +258,8 @@ button:active span::after {
 /* Touch Devices */
 @media (hover: none) and (pointer: coarse) {
   button span::after,
-  button:active span::after {
+  button:active span::after,
+  .flip[data-phase="back"] button span::after {
     --angle-2: -45deg;
   }
 }
@@ -298,14 +300,16 @@ button:hover::after {
   --angle-1: -131deg;
 }
 
-button:active::after {
+button:active::after,
+.flip[data-phase="back"] button::after {
   --angle-1: -75deg;
 }
 
 @media (hover: none) and (pointer: coarse) {
   button::after,
   button:hover::after,
-  button:active::after {
+  button:active::after,
+  .flip[data-phase="back"] button::after {
     --angle-1: -75deg;
   }
 }
@@ -322,12 +326,19 @@ button:active::after {
   opacity: 1;
 }
 
-/* Rotation */
+/* Rotation — the back phase (data-phase="back") mirrors the pressed look so a click reads as a held press */
 .button-wrap:has(button:active) {
   transform: rotate3d(1, 0, 0, 25deg);
 }
 
-.button-wrap:has(button:active) button {
+/* Debug: at click the wrap tilts to 50° and stays (animated by the wrap's own
+   transition). Face swap is disabled while we iterate on the motion. */
+.flip[data-phase="back"] .button-wrap {
+  transform: rotate3d(1, 0, 0, 50deg);
+}
+
+.button-wrap:has(button:active) button,
+.flip[data-phase="back"] .button-wrap button {
   box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
     inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
     0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.2),
@@ -337,17 +348,20 @@ button:active::after {
     inset 0 0.25em 0.05em 0 rgba(0, 0, 0, 0.15);
 }
 
-.button-wrap:has(button:active) .button-shadow {
+.button-wrap:has(button:active) .button-shadow,
+.flip[data-phase="back"] .button-wrap .button-shadow {
   filter: blur(clamp(2px, 0.125em, 12px));
   -webkit-filter: blur(clamp(2px, 0.125em, 12px));
 }
 
-.button-wrap:has(button:active) .button-shadow::after {
+.button-wrap:has(button:active) .button-shadow::after,
+.flip[data-phase="back"] .button-wrap .button-shadow::after {
   top: calc(var(--shadow-cuttoff-fix) - 0.5em);
   opacity: 0.75;
 }
 
-.button-wrap:has(button:active) span i {
+.button-wrap:has(button:active) span i,
+.flip[data-phase="back"] .button-wrap span i {
   filter: drop-shadow(0.025em 0.25em 0.05em rgba(0, 0, 0, 0.175))
     drop-shadow(0 0 0.15em rgba(255, 255, 255, 0.56));
 }
@@ -379,10 +393,11 @@ button:active::after {
 }
 
 /* ========== FACE STAGE ========== */
-/* No 3D transforms here on purpose: a transform / perspective / preserve-3d on
-   ANY ancestor starts a new backdrop root, which kills the glass button's
-   backdrop-filter (it can no longer sample the page background). So instead of
-   flipping the card we cross-fade the two faces with opacity. */
+/* Faces are swapped instantly via opacity for now (flip animation removed
+   for debugging). Note: a `perspective` or `preserve-3d` property on ANY
+   ancestor starts a new backdrop root, which kills the glass button's
+   backdrop-filter (it can no longer sample the page background) — keep 3D
+   context off ancestors of the glass button. */
 
 .scene {
   display: flex;
@@ -398,10 +413,6 @@ button:active::after {
   display: inline-block;
 }
 
-.flip-face {
-  transition: opacity 300ms var(--anim--hover-ease);
-}
-
 .flip-face--front {
   position: relative;
 }
@@ -411,16 +422,13 @@ button:active::after {
   inset: 0;
 }
 
-/* Show exactly one face per phase (opacity, never transforms). The hidden face
-   gets pointer-events:none so clicks reach the visible one. */
-.flip[data-phase="front"] .flip-face--back,
-.flip[data-phase="loading"] .flip-face--front {
+/* Face swap temporarily disabled for motion debugging: back face stays hidden
+   in BOTH phases, front face always visible. Restore the per-phase rule
+   (.flip[data-phase="front"] .flip-face--back, .flip[data-phase="back"]
+   .flip-face--front) when done. */
+.flip .flip-face--back {
   opacity: 0;
   pointer-events: none;
-}
-
-.flip[data-phase="story"] {
-  display: none;
 }
 
 /* Fill mode: glass stretches to its parent instead of hugging content. */
@@ -438,60 +446,38 @@ button:active::after {
   justify-content: center;
 }
 
-/* "Once upon a time…" loading label on the back face */
+/* "A fost odată ca niciodată…" label on the back face */
 .loading-text {
   font-size: 0.42em;
   white-space: nowrap;
 }
 
+/* Dots are absolutely positioned at their natural spot right after the text,
+   so the growing content never changes the card size or shifts the text.
+   Out of flow they no longer ride the parent's clipped gradient, so they
+   carry their own (text fill stays transparent via inheritance). */
+.dots {
+  position: absolute;
+  background: linear-gradient(90deg, #964e11 0%, #b86824 50%, #964e11 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
 .dots::after {
-  content: "";
+  content: ".";
   animation: dots 1.4s steps(1, end) infinite;
 }
 
 @keyframes dots {
   0% {
-    content: "";
-  }
-  25% {
     content: ".";
   }
-  50% {
+  33% {
     content: "..";
   }
-  75%,
+  66%,
   100% {
     content: "...";
-  }
-}
-
-/* ========== STORY SCROLL (tilted, receding into the distance) ========== */
-
-.story-scroll {
-  max-width: 32rem;
-  margin: 0 1.5rem;
-  color: #6b4525;
-  font-family: "Fredoka", sans-serif;
-  font-weight: 400;
-  font-size: 1.25rem;
-  line-height: 1.6;
-  text-align: center;
-  white-space: pre-wrap;
-  transform-origin: 50% 0;
-  transform: perspective(500px) rotateX(40deg);
-  -webkit-mask-image: linear-gradient(to top, #000 45%, transparent 92%);
-  mask-image: linear-gradient(to top, #000 45%, transparent 92%);
-  animation: scroll-in 800ms var(--anim--hover-ease) both;
-}
-
-@keyframes scroll-in {
-  from {
-    opacity: 0;
-    transform: perspective(500px) rotateX(40deg) translateY(1.5rem);
-  }
-  to {
-    opacity: 1;
-    transform: perspective(500px) rotateX(40deg) translateY(0);
   }
 }
 
