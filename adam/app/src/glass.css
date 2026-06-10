@@ -331,10 +331,11 @@ button:active::after,
   transform: rotate3d(1, 0, 0, 25deg);
 }
 
-/* Debug: at click the wrap tilts to 50° and stays (animated by the wrap's own
-   transition). Face swap is disabled while we iterate on the motion. */
+/* The flip animation starts at the pressed 25° pose, so the wrap lets go
+   instantly instead of springing back on top of it. */
 .flip[data-phase="back"] .button-wrap {
-  transform: rotate3d(1, 0, 0, 50deg);
+  transform: none;
+  transition: none;
 }
 
 .button-wrap:has(button:active) button,
@@ -393,11 +394,12 @@ button:active::after,
 }
 
 /* ========== FACE STAGE ========== */
-/* Faces are swapped instantly via opacity for now (flip animation removed
-   for debugging). Note: a `perspective` or `preserve-3d` property on ANY
-   ancestor starts a new backdrop root, which kills the glass button's
-   backdrop-filter (it can no longer sample the page background) — keep 3D
-   context off ancestors of the glass button. */
+/* Single-element rotateX flip: the card rotates edge-on and the faces swap
+   at the 90° midpoint via step animations. perspective() lives inline in the
+   transform — a `perspective` or `preserve-3d` property on ANY ancestor
+   starts a new backdrop root, which kills the glass button's backdrop-filter
+   (it can no longer sample the page background) — keep 3D context off
+   ancestors of the glass button. */
 
 .scene {
   display: flex;
@@ -413,6 +415,27 @@ button:active::after,
   display: inline-block;
 }
 
+.flip[data-phase="back"] {
+  animation: flip-card 700ms both;
+}
+
+@keyframes flip-card {
+  0% {
+    transform: perspective(800px) rotateX(25deg);
+    animation-timing-function: ease-in;
+  }
+  50% {
+    transform: perspective(800px) rotateX(90deg);
+  }
+  50.001% {
+    transform: perspective(800px) rotateX(-90deg);
+    animation-timing-function: ease-out;
+  }
+  100% {
+    transform: perspective(800px) rotateX(0deg);
+  }
+}
+
 .flip-face--front {
   position: relative;
 }
@@ -422,13 +445,29 @@ button:active::after,
   inset: 0;
 }
 
-/* Face swap temporarily disabled for motion debugging: back face stays hidden
-   in BOTH phases, front face always visible. Restore the per-phase rule
-   (.flip[data-phase="front"] .flip-face--back, .flip[data-phase="back"]
-   .flip-face--front) when done. */
-.flip .flip-face--back {
+.flip[data-phase="front"] .flip-face--back,
+.flip[data-phase="back"] .flip-face--front {
   opacity: 0;
   pointer-events: none;
+}
+
+/* Faces swap exactly at the edge-on midpoint of the flip rotation. */
+.flip[data-phase="back"] .flip-face--front {
+  animation: face-hide 700ms steps(1, end) both;
+}
+
+.flip[data-phase="back"] .flip-face--back {
+  animation: face-show 700ms steps(1, end) both;
+}
+
+@keyframes face-hide {
+  0% { opacity: 1 }
+  50%, 100% { opacity: 0 }
+}
+
+@keyframes face-show {
+  0% { opacity: 0 }
+  50%, 100% { opacity: 1 }
 }
 
 /* Fill mode: glass stretches to its parent instead of hugging content. */
