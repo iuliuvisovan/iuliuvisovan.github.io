@@ -173,7 +173,7 @@ button span {
   display: block;
   user-select: none;
   -webkit-user-select: none;
-  font-family: "Fredoka", sans-serif;
+  font-family: "Baloo 2", sans-serif;
   letter-spacing: normal;
   font-weight: 400;
   font-size: 1em;
@@ -215,7 +215,7 @@ button:hover span i {
 }
 
 /* Text */
-button span::after {
+button > span::after {
   content: "";
   display: block;
   position: absolute;
@@ -245,21 +245,13 @@ button span::after {
     --angle-2 calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease);
 }
 
-button:hover span::after {
+button:hover > span::after {
   background-position: 25% 50%;
-}
-
-button:active span::after,
-.flip[data-phase="back"] button span::after {
-  background-position: 50% 15%;
-  --angle-2: -15deg;
 }
 
 /* Touch Devices */
 @media (hover: none) and (pointer: coarse) {
-  button span::after,
-  button:active span::after,
-  .flip[data-phase="back"] button span::after {
+  button > span::after {
     --angle-2: -45deg;
   }
 }
@@ -300,16 +292,9 @@ button:hover::after {
   --angle-1: -131deg;
 }
 
-button:active::after,
-.flip[data-phase="back"] button::after {
-  --angle-1: -75deg;
-}
-
 @media (hover: none) and (pointer: coarse) {
   button::after,
-  button:hover::after,
-  button:active::after,
-  .flip[data-phase="back"] button::after {
+  button:hover::after {
     --angle-1: -75deg;
   }
 }
@@ -326,55 +311,6 @@ button:active::after,
   opacity: 1;
 }
 
-/* Rotation — the back phase (data-phase="back") mirrors the pressed look so a click reads as a held press */
-.button-wrap:has(button:active) {
-  /* perspective() here is the transform function inline on the element (same
-     pattern as the flip animation on .flip), NOT the ancestor perspective
-     property the FACE STAGE comment warns about. The flip's 0% frame is
-     perspective(800px) rotateX(25deg), so the pressed pose must use the same
-     projection or the handoff jumps. The press must also reach 25deg before a
-     normal click releases (~150ms), hence the much faster 120ms transition
-     versus the default 400ms hover time. */
-  transform: perspective(800px) rotate3d(1, 0, 0, 25deg);
-  transition-duration: 120ms;
-}
-
-/* The flip animation starts at the pressed 25° pose, so the wrap lets go
-   instantly instead of springing back on top of it. */
-.flip[data-phase="back"] .button-wrap {
-  transform: none;
-  transition: none;
-}
-
-.button-wrap:has(button:active) button,
-.flip[data-phase="back"] .button-wrap button {
-  box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
-    0 0.225em 0.05em 0 rgba(0, 0, 0, 0.05),
-    0 0.25em 0 0 rgba(255, 255, 255, 0.75),
-    inset 0 0.25em 0.05em 0 rgba(0, 0, 0, 0.15);
-}
-
-.button-wrap:has(button:active) .button-shadow,
-.flip[data-phase="back"] .button-wrap .button-shadow {
-  filter: blur(clamp(2px, 0.125em, 12px));
-  -webkit-filter: blur(clamp(2px, 0.125em, 12px));
-}
-
-.button-wrap:has(button:active) .button-shadow::after,
-.flip[data-phase="back"] .button-wrap .button-shadow::after {
-  top: calc(var(--shadow-cuttoff-fix) - 0.5em);
-  opacity: 0.75;
-}
-
-.button-wrap:has(button:active) span i,
-.flip[data-phase="back"] .button-wrap span i {
-  filter: drop-shadow(0.025em 0.25em 0.05em rgba(0, 0, 0, 0.175))
-    drop-shadow(0 0 0.15em rgba(255, 255, 255, 0.56));
-}
-
 /* ========== STORY PANEL (rough first pass — restyle freely) ========== */
 
 .story {
@@ -389,7 +325,7 @@ button:active::after,
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
   color: #6b4525;
-  font-family: "Fredoka", sans-serif;
+  font-family: "Baloo 2", sans-serif;
   font-weight: 400;
   font-size: 1.0625rem;
   line-height: 1.6;
@@ -424,12 +360,13 @@ button:active::after,
 }
 
 .flip[data-phase="back"] {
-  animation: flip-card 700ms both;
+  /* No fill-mode on purpose: a persisted transform would keep a backdrop root alive and kill the glass blur. */
+  animation: flip-card 700ms;
 }
 
 @keyframes flip-card {
   0% {
-    transform: perspective(800px) rotateX(25deg);
+    transform: perspective(800px) rotateX(0deg);
     animation-timing-function: ease-in;
   }
   50% {
@@ -453,10 +390,14 @@ button:active::after,
   inset: 0;
 }
 
+/* visibility: hidden is required on top of opacity: 0 — Chromium keeps
+   rendering an element's backdrop-filter even when an ancestor has opacity 0,
+   so the hidden face's glass button would ghost through the visible face. */
 .flip[data-phase="front"] .flip-face--back,
 .flip[data-phase="back"] .flip-face--front {
   opacity: 0;
   pointer-events: none;
+  visibility: hidden;
 }
 
 /* Faces swap exactly at the edge-on midpoint of the flip rotation. */
@@ -468,14 +409,32 @@ button:active::after,
   animation: face-show 700ms steps(1, end) both;
 }
 
+/* Once flipped, the card is inert: no hover/press effects, no pointer cursor.
+   pointer-events: none does not affect rendering, so the glass blur stays. */
+.flip[data-phase="back"] .flip-face--back button {
+  pointer-events: none;
+}
+
 @keyframes face-hide {
-  0% { opacity: 1 }
-  50%, 100% { opacity: 0 }
+  0% {
+    opacity: 1;
+    visibility: visible;
+  }
+  50%, 100% {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 @keyframes face-show {
-  0% { opacity: 0 }
-  50%, 100% { opacity: 1 }
+  0% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  50%, 100% {
+    opacity: 1;
+    visibility: visible;
+  }
 }
 
 /* Fill mode: glass stretches to its parent instead of hugging content. */
@@ -493,38 +452,33 @@ button:active::after,
   justify-content: center;
 }
 
-/* "A fost odată ca niciodată…" label on the back face */
-.loading-text {
-  font-size: 0.42em;
-  white-space: nowrap;
+/* The sheen layer (span::after) is sized to the content-hugging span, so on
+   the back face it draws a rounded box around the label — hide it there. The
+   button's own glass (backdrop-filter, outline, shadows) is untouched. */
+.flip-face--back button > span::after {
+  display: none;
 }
 
-/* Dots are absolutely positioned at their natural spot right after the text,
-   so the growing content never changes the card size or shifts the text.
-   Out of flow they no longer ride the parent's clipped gradient, so they
-   carry their own (text fill stays transparent via inheritance). */
-.dots {
-  position: absolute;
+/* "A fost odată ca niciodată…" label on the back face */
+.loading-text {
+  display: inline-block;
+  font-size: 0.8em;
+  white-space: nowrap;
+  text-align: center;
+}
+
+/* Second label line is revealed from React state 1s after the flip. It uses
+   visibility (not display) so its space is reserved and the first line never shifts.
+   The span carries its own clipped gradient since the inherited transparent text
+   fill needs a painted background on this element. */
+.loading-line2 {
+  visibility: hidden;
   background: linear-gradient(90deg, #964e11 0%, #b86824 50%, #964e11 100%);
   -webkit-background-clip: text;
   background-clip: text;
 }
 
-.dots::after {
-  content: ".";
-  animation: dots 1.4s steps(1, end) infinite;
-}
-
-@keyframes dots {
-  0% {
-    content: ".";
-  }
-  33% {
-    content: "..";
-  }
-  66%,
-  100% {
-    content: "...";
-  }
+.loading-line2--visible {
+  visibility: visible;
 }
 

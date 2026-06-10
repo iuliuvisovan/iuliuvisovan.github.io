@@ -4,18 +4,25 @@ import { startLullaby } from './lullaby'
 import tellMe from './assets/tellme.png'
 
 // front -> the image button
-// back  -> flipped, "A fost odată ca niciodată…" with animated dots
+// back  -> flipped, "A fost odată..." label
 type Phase = 'front' | 'back'
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 export default function App() {
   const [phase, setPhase] = useState<Phase>('front')
+  const [showSecondLine, setShowSecondLine] = useState(false)
 
-  function flipCard() {
+  async function flipCard() {
     if (phase === 'back') {
       return
     }
     startLullaby()
     setPhase('back')
+    await wait(2000)
+    setShowSecondLine(true)
   }
 
   return (
@@ -29,7 +36,9 @@ export default function App() {
         <div className="flip-face flip-face--back">
           <GlassButton fill onClick={flipCard}>
             <i className="loading-text">
-              A fost odată ca niciodată<span className="dots"></span>
+              A fost odată...
+              <br />
+              <span className={showSecondLine ? 'loading-line2 loading-line2--visible' : 'loading-line2'}>Ca niciodată...</span>
             </i>
           </GlassButton>
         </div>
