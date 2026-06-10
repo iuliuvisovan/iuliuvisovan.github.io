@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { playWhooshIn, playWhooshOut } from '../whoosh'
 
 type Props = {
   children: ReactNode
@@ -12,7 +13,7 @@ type Props = {
 export default function GlassButton({ children, onClick, fill }: Props) {
   return (
     <div className={fill ? 'button-wrap button-wrap--fill' : 'button-wrap'}>
-      <button onClick={onClick}>
+      <button onClick={onClick} onPointerEnter={playWhooshIn} onPointerLeave={playWhooshOut}>
         <span>{children}</span>
       </button>
       <div className="button-shadow"></div>
