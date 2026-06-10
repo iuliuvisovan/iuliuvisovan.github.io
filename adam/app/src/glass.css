@@ -328,7 +328,15 @@ button:active::after,
 
 /* Rotation — the back phase (data-phase="back") mirrors the pressed look so a click reads as a held press */
 .button-wrap:has(button:active) {
-  transform: rotate3d(1, 0, 0, 25deg);
+  /* perspective() here is the transform function inline on the element (same
+     pattern as the flip animation on .flip), NOT the ancestor perspective
+     property the FACE STAGE comment warns about. The flip's 0% frame is
+     perspective(800px) rotateX(25deg), so the pressed pose must use the same
+     projection or the handoff jumps. The press must also reach 25deg before a
+     normal click releases (~150ms), hence the much faster 120ms transition
+     versus the default 400ms hover time. */
+  transform: perspective(800px) rotate3d(1, 0, 0, 25deg);
+  transition-duration: 120ms;
 }
 
 /* The flip animation starts at the pressed 25° pose, so the wrap lets go
