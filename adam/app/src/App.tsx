@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import GlassButton from './components/GlassButton'
+import { startLullaby } from './lullaby'
 import tellMe from './assets/tellme.png'
 
 // Backend is mocked for now. To restore the real Cloudflare Worker call,
@@ -28,6 +29,7 @@ export default function App() {
   const [story, setStory] = useState('')
 
   async function tellStory() {
+    startLullaby()
     if (phase === 'loading') {
       return
     }
