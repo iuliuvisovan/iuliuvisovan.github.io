@@ -1,3 +1,4 @@
+import { SOUNDS_ENABLED } from './config'
 import whooshInUrl from './assets/whoosh-in.mp3'
 import whooshOutUrl from './assets/whoosh-out.mp3'
 
@@ -37,6 +38,9 @@ window.addEventListener('pointerdown', unlock, { once: true })
 window.addEventListener('keydown', unlock, { once: true })
 
 function play(buffer: AudioBuffer | null) {
+  if (!SOUNDS_ENABLED) {
+    return
+  }
   if (!context || context.state !== 'running' || !buffer) {
     return
   }

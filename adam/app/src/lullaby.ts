@@ -1,3 +1,4 @@
+import { SOUNDS_ENABLED } from './config'
 import lullabyUrl from './assets/lullaby.mp3'
 
 let audio: HTMLAudioElement | null = null
@@ -9,6 +10,9 @@ const FADE_STEP_MS = 100
 // Starts the looping lullaby on the first call and fades it in. Later calls
 // are no-ops, so it's safe to fire on every button press.
 export function startLullaby() {
+  if (!SOUNDS_ENABLED) {
+    return
+  }
   if (audio) {
     return
   }
