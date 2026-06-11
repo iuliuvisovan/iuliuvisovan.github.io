@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import GlassButton from './components/GlassButton'
 import { startLullaby } from './lullaby'
-import { prefetchNarration, playNarration } from './narration'
+import { prefetchNarration, playNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
 import tellMe from './assets/tellme.png'
 
 // front -> the image button
@@ -19,9 +19,6 @@ const MOCK_STORY = `A fost odată ca niciodată un băiețel pe nume Adam, care 
 Într-o seară, Adam a găsit pe pervaz o steluță mică, obosită de atâta strălucit. A învelit-o încet într-o batistă moale și i-a șoptit o poveste, până când steluța a adormit zâmbind.
 
 Drept mulțumire, steluța i-a presărat pe pernă un praf auriu de vise frumoase. Adam a închis ochii, a tras plapuma până la bărbie și a plutit lin spre tărâmul somnului, unde toate poveștile încep cu „a fost odată”.`
-
-// Doubled for now so the expanded card has enough content to scroll
-const LONG_STORY = `${MOCK_STORY}\n\n${MOCK_STORY}`
 
 // Only the first two paragraphs get narrated for now
 const NARRATION_TEXT = MOCK_STORY.split('\n\n').slice(0, 2).join('\n\n')
@@ -66,6 +63,23 @@ function TypedLine({ text, active }: TypedLineProps) {
   )
 }
 
+function PauseIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="#964e11" aria-hidden="true">
+      <rect x="6" y="4" width="4" height="16" rx="1.5" />
+      <rect x="14" y="4" width="4" height="16" rx="1.5" />
+    </svg>
+  )
+}
+
+function PlayIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="#964e11" aria-hidden="true">
+      <path d="M8 5 L19 12 L8 19 Z" stroke="#964e11" strokeWidth="2" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 export default function App() {
   const [phase, setPhase] = useState<Phase>('front')
   const [face, setFace] = useState<Phase>('front')
@@ -73,6 +87,17 @@ export default function App() {
   const [line2Active, setLine2Active] = useState(false)
   const [expanded, setExpanded] = useState(false)
   const [storyVisible, setStoryVisible] = useState(false)
+  const [paused, setPaused] = useState(false)
+
+  function toggleStoryAudio() {
+    if (paused) {
+      resumeStoryAudio()
+      setPaused(false)
+    } else {
+      pauseStoryAudio()
+      setPaused(true)
+    }
+  }
 
   async function flipCard() {
     if (phase === 'back') {
@@ -116,8 +141,13 @@ export default function App() {
                 <TypedLine text={LINE_2} active={line2Active} />
               </span>
             </i>
-            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>{LONG_STORY}</div>
+            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>{NARRATION_TEXT}</div>
           </GlassButton>
+          {storyVisible && (
+            <button className="pause-button" onClick={toggleStoryAudio} aria-label={paused ? 'Continuă' : 'Pauză'}>
+              {paused ? <PlayIcon /> : <PauseIcon />}
+            </button>
+          )}
         </div>
       </div>
     </div>

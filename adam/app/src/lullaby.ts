@@ -36,6 +36,12 @@ export function startLullaby() {
   audio.play().catch(() => {})
 }
 
+// Exposes the lullaby element so narration.ts can fade and pause/resume it
+// together with the story narration.
+export function getLullabyAudio(): HTMLAudioElement | null {
+  return audio
+}
+
 // Sets the lullaby volume directly (clamped 0..1). Used by narration to duck
 // the lullaby while the story is being read, then restore it.
 export function setLullabyVolume(volume: number) {

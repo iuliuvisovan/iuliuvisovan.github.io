@@ -417,8 +417,10 @@ button::after {
 }
 
 /* Once flipped, the card is inert: no hover/press effects, no pointer cursor.
-   pointer-events: none does not affect rendering, so the glass blur stays. */
-.flip[data-phase="back"] .flip-face--back button {
+   pointer-events: none does not affect rendering, so the glass blur stays.
+   Scoped to the glass button (.button-wrap) so the floating pause control,
+   a sibling button on the back face, stays clickable. */
+.flip[data-phase="back"] .flip-face--back .button-wrap button {
   pointer-events: none;
 }
 
@@ -560,5 +562,48 @@ button::after {
    the --visible class lands 900ms later. */
 .flip[data-expanded="false"] .story-text {
   display: none;
+}
+
+/* Floating circular glass pause/play control over the story */
+.pause-button {
+  all: unset;
+  cursor: pointer;
+  pointer-events: auto;
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  translate: -50% 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 251, 245, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  animation: pause-button-in 800ms ease forwards;
+  z-index: 3;
+  transition: background var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease), scale var(--anim--hover-time) var(--anim--hover-ease);
+}
+
+.pause-button:hover {
+  background: rgba(255, 251, 245, 0.55);
+  scale: 1.07;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+}
+
+/* The global button::after outline pseudo would draw the glass-button border
+   ring on this control too; all: unset can't remove pseudo-elements. */
+.pause-button::after {
+  content: none;
+}
+
+@keyframes pause-button-in {
+  to {
+    opacity: 1;
+  }
 }
 
