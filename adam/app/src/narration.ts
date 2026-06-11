@@ -15,6 +15,10 @@ let pausedInGap = false
 // The chunk that plays after the current one (or after the gap we're in)
 let nextChunkIndex = 0
 
+// Runs GAP_MS after a story's last chunk finishes, so the app can move on to
+// the next story.
+let endedCallback: (() => void) | null = null
+
 // Bumped by stopNarration to invalidate everything in flight. Async work
 // captures the value it started under and bails if the counter has moved on,
 // so switching stories mid-fetch or mid-gap can never start audio from the
@@ -84,7 +88,8 @@ export function pauseStoryAudio() {
 // volume and the lullaby returns to its ducked level while the narration is
 // still speaking, or to its normal level once the narration is over. If we
 // paused inside the breathing gap, the lullaby comes back and the gap timer
-// is re-armed for the next chunk with the full GAP_MS.
+// is re-armed with the full GAP_MS, leading to the next chunk or, after the
+// last chunk, to the story-ended callback.
 export function resumeStoryAudio() {
   if (!SOUNDS_ENABLED) {
     return
@@ -97,12 +102,17 @@ export function resumeStoryAudio() {
       rampVolume(lullaby, TARGET_VOLUME, 1000)
     }
     const mySession = session
+    const ended = endedCallback
     betweenTimer = setTimeout(() => {
       betweenTimer = null
       if (mySession !== session) {
         return
       }
-      playChunk(nextChunkIndex)
+      if (nextChunkIndex < activeChunks.length) {
+        playChunk(nextChunkIndex)
+      } else if (ended) {
+        ended()
+      }
     }, GAP_MS)
     return
   }
@@ -150,12 +160,15 @@ export function prefetchNarration(storyId: number, texts: string[]) {
 
 // Starts a story from its first chunk: anything still playing or pending from
 // a previous story is stopped, the story's chunks are (pre)fetched, and the
-// lullaby is brought back in case pauseStoryAudio had silenced it.
-export function startNarration(storyId: number, texts: string[]) {
+// lullaby is brought back in case pauseStoryAudio had silenced it. The
+// optional `storyEnded` runs GAP_MS after the last chunk finishes, so the app
+// can auto-advance to the next story.
+export function startNarration(storyId: number, texts: string[], storyEnded?: () => void) {
   if (!SOUNDS_ENABLED) {
     return
   }
   stopNarration()
+  endedCallback = storyEnded ?? null
   prefetchNarration(storyId, texts)
   activeChunks = narrationCache.get(storyId) ?? []
   getLullabyAudio()?.play().catch(() => {})
@@ -172,6 +185,7 @@ export function stopNarration() {
     betweenTimer = null
   }
   pausedInGap = false
+  endedCallback = null
   if (currentAudio) {
     currentAudio.pause()
     currentAudio = null
@@ -212,8 +226,10 @@ async function playChunk(index: number) {
 
 // Runs when a chunk finishes speaking (or its fetch failed): the lullaby
 // breathes back up to its normal level and, if there is another chunk, the
-// gap timer is armed to play it after GAP_MS. Guarded by session so a stale
-// chunk can never schedule the next one for a story that's gone.
+// gap timer is armed to play it after GAP_MS. After the last chunk the same
+// gap leads to the story-ended callback instead, so the app can move to the
+// next story. Guarded by session so a stale chunk can never schedule work
+// for a story that's gone.
 function chunkEnded(mySession: number) {
   if (mySession !== session) {
     return
@@ -229,6 +245,15 @@ function chunkEnded(mySession: number) {
         return
       }
       playChunk(nextChunkIndex)
+    }, GAP_MS)
+  } else if (endedCallback) {
+    const ended = endedCallback
+    betweenTimer = setTimeout(() => {
+      betweenTimer = null
+      if (mySession !== session) {
+        return
+      }
+      ended()
     }, GAP_MS)
   }
 }

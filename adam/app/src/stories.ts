@@ -10,7 +10,7 @@ export const STORIES: Story[] = [
   {
     id: 1,
     paragraphs: [
-      'A fost odată, ca niciodată... Într-o seară liniștită, când luna se vedea la geam, bebe Adam s-a trezit și a clipit încet. Uite, pe păturica lui era o luminiță mică, de parcă o stea coborâse în camera lui.',
+      'A fost odată, ca niciodată, o luminiță mică, ce a coborât din cer într-o seară liniștită, când luna se vedea la geam. Bebe Adam s-a trezit, a clipit încet și uite: luminița stătea chiar pe păturica lui, de parcă o stea venise în camera lui.',
       'Luminița s-a rostogolit încet până lângă mânuța lui și a clipit de două ori. Din ușă a venit mama, zâmbind. „Da, Adam, am văzut și eu. Avem un musafir mic.”',
       'Luminița părea obosită după drumul lung de pe cer. Mama a adus puțină apă și a pus un strop lângă ea, ca și cum ar fi ajutat o stea să-și recapete puterea.',
       'După ce luminița s-a făcut mai strălucitoare, a început să urce spre geam. Dar Adam a scos un sunet mic, de parcă spunea: „nu”. Atunci luminița s-a întors lângă el.',
@@ -21,7 +21,7 @@ export const STORIES: Story[] = [
   {
     id: 2,
     paragraphs: [
-      'A fost odată, ca niciodată... Într-o dimineață liniștită, bebe Adam stătea în pătuț și privea spre perdea. Uite, pe marginea ei se mișca încet o umbră mică, rotundă, ca un balon care venise să-l salute.',
+      'A fost odată, ca niciodată, o umbră mică și rotundă, care s-a arătat într-o dimineață liniștită pe marginea perdelei. Bebe Adam stătea în pătuț și uite: umbra se mișca încet, ca un balon care venise să-l salute.',
       'A intrat tata și s-a apropiat încet. „Da, Adam, am văzut și eu.” Umbra s-a ascuns după perdea, apoi a ieșit iar, ca și cum se juca de-a v-ați ascunselea.',
       'Tata a luat un pahar cu apă și l-a pus pe noptieră. Balonul de umbră s-a oglindit în apă și, deodată, Adam a văzut că nu era o umbră, ci o bulină de lumină rătăcită.',
       'Tata a vrut să deschidă geamul ca bulina să plece afară, dar Adam a scos un sunet mic: „nu”. Tata a zâmbit și a spus: „Bine, mai stă puțin cu noi.”',
@@ -32,7 +32,7 @@ export const STORIES: Story[] = [
   {
     id: 3,
     paragraphs: [
-      'A fost odată, ca niciodată... Într-o dimineață liniștită, bebe Adam stătea în pătuț și se uita spre geam. Pe sticlă era o picătură mică de apă. Uite, picătura cobora încet, ca și cum mergea la plimbare.',
+      'A fost odată, ca niciodată, o picătură mică de apă, ce s-a așezat pe geam într-o dimineață liniștită. Bebe Adam stătea în pătuț și se uita la ea. Uite, picătura cobora încet pe sticlă, ca și cum mergea la plimbare.',
       'Picătura s-a oprit la mijlocul geamului și a strălucit puțin. A venit mama și a zâmbit. „Da, Adam, ai văzut bine. E o picătură curioasă.”',
       'Apoi a venit tata cu un pahar mic de apă. A pus paharul lângă pătuț, iar lumina din cameră s-a oglindit în el. Adam a privit apa cum tremura ușor, ca o mică mare într-un pahar.',
       'Picătura de pe geam părea că vrea să intre la Adam. Dar vântul a mișcat perdeaua, iar Adam a scos un sunet mic, de parcă spunea: „nu”. Tata a închis geamul încet, ca să fie bine și cald.',
@@ -43,7 +43,7 @@ export const STORIES: Story[] = [
   {
     id: 4,
     paragraphs: [
-      'A fost odată, ca niciodată... Într-o seară liniștită, bebe Adam stătea în pătuț și privea spre ușă. Uite, din bucătărie se auzea un sunet mic, ca un pahar pus încet pe masă.',
+      'A fost odată, ca niciodată, un băiețel pe nume Adam, care stătea în pătuț într-o seară liniștită și privea spre ușă. Uite, din bucătărie se auzea un sunet mic, ca un pahar pus încet pe masă.',
       'A venit tata și s-a așezat lângă el. În cameră mirosea curat și cald, iar Adam știa că undeva aproape se pregătea ceva bun. Tata a zâmbit: „Da, Adam, vine imediat.”',
       'Pe noptieră era un pahar cu apă, iar lângă el stătea o sticluță cu lapte. Laptele era alb și liniștit, ca o lună mică prinsă într-un biberon.',
       'Adam a mișcat mânuța spre biberon, dar când tata l-a ridicat prea repede, bebe a scos un sunet mic, de parcă spunea: „nu”. Tata a înțeles și l-a ținut mai aproape, fără grabă.',
@@ -54,7 +54,7 @@ export const STORIES: Story[] = [
   {
     id: 5,
     paragraphs: [
-      'A fost odată, ca niciodată... Într-o seară liniștită, bebe Adam stătea în pătuț și se uita la tavan. Uite, pe perete se vedea o lumină mică, rotundă, care se mișca încet când perdeaua se legăna.',
+      'A fost odată, ca niciodată, o lumină mică și rotundă, care a apărut pe perete într-o seară liniștită. Bebe Adam stătea în pătuț, se uita la ea și uite: lumina se mișca încet ori de câte ori perdeaua se legăna.',
       'A venit tata și a tras perdeaua puțin mai bine. Lumina nu a dispărut de tot, doar s-a făcut mai mică. „Da, Adam, încă e aici. Dar și ea se pregătește de nani.”',
       'Pe noptieră era un pahar cu apă, iar lângă pătuț era o păturică așezată frumos. Camera devenea tot mai liniștită, ca și cum toate lucrurile știau că vine somnul.',
       'Adam a deschis ochii mari, de parcă spunea „nu, încă nu.” Tata a zâmbit și l-a ținut puțin mai aproape. Nu era grabă. Nani venea încet, ca un musafir blând.',

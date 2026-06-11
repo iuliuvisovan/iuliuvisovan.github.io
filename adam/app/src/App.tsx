@@ -94,15 +94,23 @@ export default function App() {
 
   const selectedStory = STORIES.find((story) => story.id === storyId) ?? STORIES[0]
 
+  function playStory(id: number) {
+    setStoryId(id)
+    setPaused(false)
+    const story = STORIES.find((candidate) => candidate.id === id) ?? STORIES[0]
+    const index = STORIES.findIndex((candidate) => candidate.id === story.id)
+    const next = STORIES[(index + 1) % STORIES.length]
+    // Prefetch the next story right away so the auto-advance gap is seamless
+    prefetchNarration(next.id, narrationChunks(next))
+    startNarration(id, narrationChunks(story), () => playStory(next.id))
+    storyContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   function selectStory(id: number) {
     if (id === storyId) {
       return
     }
-    setStoryId(id)
-    setPaused(false)
-    const story = STORIES.find((candidate) => candidate.id === id) ?? STORIES[0]
-    startNarration(id, narrationChunks(story))
-    storyContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+    playStory(id)
   }
 
   function toggleStoryAudio() {
@@ -137,7 +145,7 @@ export default function App() {
     setExpanded(true)
     await wait(900)
     setStoryVisible(true)
-    startNarration(selectedStory.id, narrationChunks(selectedStory))
+    playStory(selectedStory.id)
   }
 
   return (
