@@ -56,19 +56,29 @@ body::before {
   background-position: center;
   background-repeat: no-repeat;
   transform-origin: 50% 400%;
-  animation: rock 7s ease-in-out infinite;
-  will-change: transform;
+  animation: rock-sway 7s ease-in-out infinite, rock-dip 3.5s ease-in-out infinite;
+  will-change: rotate, translate;
 }
 
-@keyframes rock {
-  0% {
-    transform: rotate(-0.5deg);
+/* Sway and dip run as separate animations on the standalone rotate/translate
+   properties: the dip cycles at twice the sway frequency (lowest at each swing
+   extreme, highest through center), and with only end-point keyframes per
+   track the easing never brakes mid-swing. */
+@keyframes rock-sway {
+  0%, 100% {
+    rotate: -0.3deg;
   }
   50% {
-    transform: rotate(0.5deg);
+    rotate: 0.3deg;
   }
-  100% {
-    transform: rotate(-0.5deg);
+}
+
+@keyframes rock-dip {
+  0%, 100% {
+    translate: 0 6px;
+  }
+  50% {
+    translate: 0 0;
   }
 }
 
