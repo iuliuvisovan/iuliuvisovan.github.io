@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import GlassButton from './components/GlassButton'
 import { startLullaby } from './lullaby'
+import { playWhoosh } from './whoosh'
+import { playIntro } from './intro'
 import { prefetchNarration, startNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
 import { STORIES, type Story } from './stories'
 import tellMe from './assets/tellme.png'
@@ -128,6 +130,8 @@ export default function App() {
       return
     }
     startLullaby()
+    playWhoosh()
+    playIntro()
     prefetchNarration(selectedStory.id, narrationChunks(selectedStory))
     setPhase('back')
     // The CSS flip animation runs 700ms; the faces swap at the 90° edge-on
@@ -157,7 +161,7 @@ export default function App() {
           </GlassButton>
         </div>
         <div className="flip-face flip-face--back">
-          <GlassButton fill silent onClick={flipCard} contentRef={storyContentRef}>
+          <GlassButton fill onClick={flipCard} contentRef={storyContentRef}>
             <i className="loading-text">
               <TypedLine text={LINE_1} active={line1Active} />
               <br />

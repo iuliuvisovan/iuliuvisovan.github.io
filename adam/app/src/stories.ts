@@ -22,7 +22,7 @@ export const STORIES: Story[] = [
     id: 2,
     paragraphs: [
       'A fost odată, ca niciodată, o umbră mică și rotundă, care s-a arătat într-o dimineață liniștită pe marginea perdelei. Bebe Adam stătea în pătuț și uite: umbra se mișca încet, ca un balon care venise să-l salute.',
-      'A intrat tata și s-a apropiat încet. „Da, Adam, am văzut și eu.” Umbra s-a ascuns după perdea, apoi a ieșit iar, ca și cum se juca de-a v-ați ascunselea.',
+      'Tata a intrat încet în cameră și s-a uitat și el spre perdea. „Da, Adam, o văd și eu.” Umbra s-a ascuns o clipă după perdea, apoi a ieșit din nou, ca și cum voia să se joace de-a v-ați ascunselea.',
       'Tata a luat un pahar cu apă și l-a pus pe noptieră. Balonul de umbră s-a oglindit în apă și, deodată, Adam a văzut că nu era o umbră, ci o bulină de lumină rătăcită.',
       'Tata a vrut să deschidă geamul ca bulina să plece afară, dar Adam a scos un sunet mic: „nu”. Tata a zâmbit și a spus: „Bine, mai stă puțin cu noi.”',
       'După papa, Adam s-a liniștit, iar bulina de lumină s-a plimbat pe perete până a ajuns lângă pătuț. Tata i-a arătat-o cu degetul: „Uite, Adam, te păzește.”',
