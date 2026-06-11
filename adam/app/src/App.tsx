@@ -18,10 +18,13 @@ const MOCK_STORY = `A fost odată ca niciodată un băiețel pe nume Adam, care 
 
 Într-o seară, Adam a găsit pe pervaz o steluță mică, obosită de atâta strălucit. A învelit-o încet într-o batistă moale și i-a șoptit o poveste, până când steluța a adormit zâmbind.
 
-Drept mulțumire, steluța i-a presărat pe pernă un praf auriu de vise frumoase. Adam a închis ochii, a tras plapuma până la bărbie și a plutit lin spre tărâmul somnului, unde toate poveștile încep cu „a fost odată”.`
+Dimineața, steluța s-a trezit odihnită și i-a mulțumit lui Adam cu o lumină caldă, mică de tot, cât un bob de grâu. Apoi i-a arătat un drum subțire de sclipici, care pornea de la fereastră și mergea până în pădure. Adam și-a pus papucii, a luat steluța în palmă și a pășit încet, să nu trezească iarba.
 
-// Only the first two paragraphs get narrated for now
-const NARRATION_TEXT = MOCK_STORY.split('\n\n').slice(0, 2).join('\n\n')
+În pădure, toate lucrurile vorbeau în șoaptă: frunzele spuneau „bună dimineața", ciupercile își ridicau pălăriile, iar un arici somnoros i-a arătat lui Adam unde se ascunde roua. La capătul drumului, băiețelul a găsit un leagăn prins între doi nori mici. S-a urcat în el, iar steluța l-a legănat ușor, până când lumea întreagă a început să pară o poveste moale și bună.`
+
+const STORY_PARAGRAPHS = MOCK_STORY.split('\n\n')
+// Narrated in chunks of two paragraphs, with a lullaby-only pause between
+const NARRATION_CHUNKS = [STORY_PARAGRAPHS.slice(0, 2).join('\n\n'), STORY_PARAGRAPHS.slice(2, 4).join('\n\n')]
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -104,7 +107,7 @@ export default function App() {
       return
     }
     startLullaby()
-    prefetchNarration(NARRATION_TEXT)
+    prefetchNarration(NARRATION_CHUNKS)
     setPhase('back')
     // The CSS flip animation runs 700ms; the faces swap at the 90° edge-on
     // midpoint (350ms), driven from React so no filled CSS animation lingers.
@@ -141,7 +144,7 @@ export default function App() {
                 <TypedLine text={LINE_2} active={line2Active} />
               </span>
             </i>
-            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>{NARRATION_TEXT}</div>
+            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>{MOCK_STORY}</div>
           </GlassButton>
           {storyVisible && (
             <button className="pause-button" onClick={toggleStoryAudio} aria-label={paused ? 'Continuă' : 'Pauză'}>

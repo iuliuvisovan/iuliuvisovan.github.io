@@ -1,10 +1,11 @@
 // Cloudflare Worker: OpenAI proxy for the "Tell me a story" button.
-// The API key lives ONLY here as a Worker secret (OPENAI_API_KEY) and never
-// reaches the browser. The frontend POSTs here; we call OpenAI and return text.
-// POST /narrate turns story text into speech (mp3) via OpenAI TTS, with edge caching.
+// The API keys live ONLY here as Worker secrets and never reach the browser.
+// The frontend POSTs here; we call OpenAI and return text.
+// POST /narrate turns story text into speech (mp3) via ElevenLabs TTS, with edge caching.
 
 type Env = {
   OPENAI_API_KEY: string
+  ELEVENLABS_API_KEY: string
 }
 
 // Browser callers we allow (CORS). Add more origins if you serve from elsewhere.
@@ -16,11 +17,19 @@ const ALLOWED_ORIGINS = [
 // Swap for a newer/cheaper OpenAI model whenever you like.
 const MODEL = 'gpt-4o-mini'
 
-const NARRATION_MODEL = 'gpt-4o-mini-tts'
-const NARRATION_VOICE = 'cedar'
+// iuliu Seiren - cloned voice
+const NARRATION_VOICE_ID = '8oIq3IoTXaBptRimDDsj'
+const NARRATION_MODEL = 'eleven_multilingual_v2'
+const NARRATION_VOICE_SETTINGS = {
+  stability: 0.5,
+  similarity_boost: 1.0,
+  style: 0.5,
+  speed: 0.88,
+  use_speaker_boost: true,
+}
 const NARRATION_MAX_CHARS = 4000
-const NARRATION_INSTRUCTIONS =
-  'Ești un bunic cald care îi spune nepoțelului Adam o poveste de culcare. Vorbește în limba română cu accent natural. Voce caldă și calmă, dar vie și expresivă: intonație bogată, melodioasă, ca un povestitor adevărat. Ritm relaxat dar natural, nu târât. Pauze scurte și firești între propoziții.'
+// Bump this tag whenever voice/settings change so stale cached audio is not served.
+const NARRATION_CACHE_TAG = 'iuliu-seiren-mv2-v2'
 
 function corsHeaders(origin: string | null): Record<string, string> {
   const allow =
@@ -65,11 +74,15 @@ async function narrate(
     })
   }
 
-  // Edge cache: the same text is only sent to OpenAI once.
+  // Edge cache: the same text is only sent to ElevenLabs once. The version
+  // tag keeps old audio (different voice/settings) from being served.
   const cache = caches.default
-  const cacheKey = new Request('https://narrate.cache/' + (await sha256Hex(text)), {
-    method: 'GET',
-  })
+  const cacheKey = new Request(
+    'https://narrate.cache/' + (await sha256Hex(NARRATION_CACHE_TAG + '|' + text)),
+    {
+      method: 'GET',
+    }
+  )
 
   const cached = await cache.match(cacheKey)
   if (cached) {
@@ -78,24 +91,26 @@ async function narrate(
     })
   }
 
-  const openaiRes = await fetch('https://api.openai.com/v1/audio/speech', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${env.OPENAI_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: NARRATION_MODEL,
-      voice: NARRATION_VOICE,
-      input: text,
-      instructions: NARRATION_INSTRUCTIONS,
-      response_format: 'mp3',
-    }),
-  })
+  const ttsRes = await fetch(
+    `https://api.elevenlabs.io/v1/text-to-speech/${NARRATION_VOICE_ID}?output_format=mp3_44100_128`,
+    {
+      method: 'POST',
+      headers: {
+        'xi-api-key': env.ELEVENLABS_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text,
+        model_id: NARRATION_MODEL,
+        language_code: 'ro',
+        voice_settings: NARRATION_VOICE_SETTINGS,
+      }),
+    }
+  )
 
-  if (!openaiRes.ok) {
-    const detail = await openaiRes.text()
-    return new Response(JSON.stringify({ error: 'openai_failed', detail }), {
+  if (!ttsRes.ok) {
+    const detail = await ttsRes.text()
+    return new Response(JSON.stringify({ error: 'tts_failed', detail }), {
       status: 502,
       headers: { ...cors, 'Content-Type': 'application/json' },
     })
@@ -103,7 +118,7 @@ async function narrate(
 
   // A body can only be read once: clone so one copy goes to the cache and
   // the other to the caller. CORS headers stay out of the cached copy.
-  const toCache = new Response(openaiRes.body, {
+  const toCache = new Response(ttsRes.body, {
     headers: {
       'Content-Type': 'audio/mpeg',
       'Cache-Control': 'public, max-age=604800',
