@@ -522,6 +522,12 @@ button::after {
   /* White glow via drop-shadow because text-shadow can't work on clipped-gradient
      text; this intentionally replaces the button's dark text shadow on this label. */
   filter: drop-shadow(0 0 0.12em rgba(255, 255, 255, 0.9)) drop-shadow(0 0 0.35em rgba(255, 255, 255, 0.6)) drop-shadow(0 0 0.7em rgba(255, 255, 255, 0.35));
+  transition: margin-top 900ms var(--anim--hover-ease);
+}
+
+/* Expanded: pushes the label down to clear the floating story picker */
+.flip[data-expanded="true"] .loading-text {
+  margin-top: 64px;
 }
 
 /* Second label line is typed letter by letter from React state after the flip.
@@ -607,5 +613,62 @@ button::after {
   to {
     opacity: 1;
   }
+}
+
+/* Floating row of numbered story-picker controls at the top of the story */
+.story-picker {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  gap: 12px;
+  z-index: 3;
+  pointer-events: auto;
+  opacity: 0;
+  animation: pause-button-in 800ms ease forwards;
+}
+
+.story-picker-button {
+  all: unset;
+  cursor: pointer;
+  pointer-events: auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 251, 245, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
+  font-family: "Baloo 2", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #964e11;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease), scale var(--anim--hover-time) var(--anim--hover-ease);
+}
+
+.story-picker-button:hover {
+  background: rgba(255, 251, 245, 0.55);
+  scale: 1.07;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+}
+
+/* The global button::after outline pseudo would draw the glass-button border
+   ring on these controls too; all: unset can't remove pseudo-elements. */
+.story-picker-button::after {
+  content: none;
+}
+
+/* Selected story: brighter glass plus a soft outer ring; the :hover pairing
+   keeps the ring from being overridden while hovering the active button. */
+.story-picker-button--active,
+.story-picker-button--active:hover {
+  background: rgba(255, 251, 245, 0.7);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 2px rgba(150, 78, 17, 0.35);
 }
 

@@ -1,17 +1,25 @@
-import { SOUNDS_ENABLED } from './config'
+import { STORY_API_URL, SOUNDS_ENABLED } from './config'
 import { getLullabyAudio, TARGET_VOLUME } from './lullaby'
-import story1Url from './assets/story-1.mp3'
-import story2Url from './assets/story-2.mp3'
 
-// Static narration audio, one file per two story paragraphs
-const chunkUrls = [story1Url, story2Url]
+// Narration audio fetched from the worker, one mp3 per two story paragraphs,
+// so three chunks per story. Cached per story so coming back to an already
+// fetched story never refetches.
+const narrationCache = new Map<number, Promise<string>[]>()
+
+// The chunk promises of the story currently playing
+let activeChunks: Promise<string>[] = []
 
 let currentAudio: HTMLAudioElement | null = null
 let betweenTimer: ReturnType<typeof setTimeout> | null = null
 let pausedInGap = false
-let started = false
 // The chunk that plays after the current one (or after the gap we're in)
 let nextChunkIndex = 0
+
+// Bumped by stopNarration to invalidate everything in flight. Async work
+// captures the value it started under and bails if the counter has moved on,
+// so switching stories mid-fetch or mid-gap can never start audio from the
+// old story.
+let session = 0
 
 // How quiet the lullaby gets while the narration is speaking
 const DUCKED_VOLUME = 0.12
@@ -88,8 +96,12 @@ export function resumeStoryAudio() {
       lullaby.play().catch(() => {})
       rampVolume(lullaby, TARGET_VOLUME, 1000)
     }
+    const mySession = session
     betweenTimer = setTimeout(() => {
       betweenTimer = null
+      if (mySession !== session) {
+        return
+      }
       playChunk(nextChunkIndex)
     }, GAP_MS)
     return
@@ -106,56 +118,79 @@ export function resumeStoryAudio() {
   }
 }
 
-// Starts fetching the narration audio for every chunk right away and keeps
-// the promises so playNarration can await them later. Idempotent: later
-// calls are no-ops. Narration is best-effort, so any failure resolves to ''
-// instead of throwing.
-export function prefetchNarration(texts: string[]) {
+// Starts fetching the narration audio for every chunk of a story right away
+// and keeps the promises so playChunk can await them later. Idempotent per
+// story: later calls for an already-cached story are no-ops. Narration is
+// best-effort, so any failure resolves to '' instead of throwing.
+export function prefetchNarration(storyId: number, texts: string[]) {
   if (!SOUNDS_ENABLED) {
     return
   }
-  if (chunkUrls.length) {
+  if (narrationCache.has(storyId)) {
     return
   }
-  chunkUrls = texts.map((text) =>
-    fetch(`${STORY_API_URL}/narrate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          return ''
-        }
-        return response.blob().then((blob) => URL.createObjectURL(blob))
+  narrationCache.set(
+    storyId,
+    texts.map((text) =>
+      fetch(`${STORY_API_URL}/narrate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
       })
-      .catch(() => '')
+        .then((response) => {
+          if (!response.ok) {
+            return ''
+          }
+          return response.blob().then((blob) => URL.createObjectURL(blob))
+        })
+        .catch(() => '')
+    )
   )
 }
 
-// Plays the prefetched chunks in order: the lullaby ducks while a chunk
-// speaks, then breathes back up during the gap before the next one.
-export async function playNarration() {
+// Starts a story from its first chunk: anything still playing or pending from
+// a previous story is stopped, the story's chunks are (pre)fetched, and the
+// lullaby is brought back in case pauseStoryAudio had silenced it.
+export function startNarration(storyId: number, texts: string[]) {
   if (!SOUNDS_ENABLED) {
     return
   }
-  if (!chunkUrls.length) {
-    return
-  }
-  if (started) {
-    return
-  }
-  started = true
+  stopNarration()
+  prefetchNarration(storyId, texts)
+  activeChunks = narrationCache.get(storyId) ?? []
+  getLullabyAudio()?.play().catch(() => {})
   playChunk(0)
 }
 
+// Stops the current narration outright: in-flight fetches, the gap timer and
+// the chunk that's speaking all become stale. Bumping `session` is what makes
+// any awaited work bail instead of resuming on top of the next story.
+export function stopNarration() {
+  session += 1
+  if (betweenTimer !== null) {
+    clearTimeout(betweenTimer)
+    betweenTimer = null
+  }
+  pausedInGap = false
+  if (currentAudio) {
+    currentAudio.pause()
+    currentAudio = null
+  }
+}
+
 // Plays one narration chunk: ducks the lullaby, speaks, then hands off to
-// chunkEnded. A failed fetch ('' url) skips straight to chunkEnded.
+// chunkEnded. A failed fetch ('' url) skips straight to chunkEnded. The fetch
+// await is the dangerous window: if the story changed while we waited, the
+// session check makes us walk away.
 async function playChunk(index: number) {
+  const mySession = session
   nextChunkIndex = index + 1
-  const url = await chunkUrls[index]
+  const url = await activeChunks[index]
+  if (mySession !== session) {
+    return
+  }
   if (!url) {
-    chunkEnded()
+    chunkEnded(mySession)
     return
   }
   const narration = new Audio(url)
@@ -166,23 +201,33 @@ async function playChunk(index: number) {
     rampVolume(lullaby, DUCKED_VOLUME, 500)
   }
   narration.addEventListener('ended', () => {
+    if (mySession !== session) {
+      return
+    }
     currentAudio = null
-    chunkEnded()
+    chunkEnded(mySession)
   })
   narration.play().catch(() => {})
 }
 
 // Runs when a chunk finishes speaking (or its fetch failed): the lullaby
 // breathes back up to its normal level and, if there is another chunk, the
-// gap timer is armed to play it after GAP_MS.
-function chunkEnded() {
+// gap timer is armed to play it after GAP_MS. Guarded by session so a stale
+// chunk can never schedule the next one for a story that's gone.
+function chunkEnded(mySession: number) {
+  if (mySession !== session) {
+    return
+  }
   const lullaby = getLullabyAudio()
   if (lullaby) {
     rampVolume(lullaby, TARGET_VOLUME, 1000)
   }
-  if (nextChunkIndex < chunkUrls.length) {
+  if (nextChunkIndex < activeChunks.length) {
     betweenTimer = setTimeout(() => {
       betweenTimer = null
+      if (mySession !== session) {
+        return
+      }
       playChunk(nextChunkIndex)
     }, GAP_MS)
   }

@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import GlassButton from './components/GlassButton'
 import { startLullaby } from './lullaby'
-import { prefetchNarration, playNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
+import { prefetchNarration, startNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
+import { STORIES, type Story } from './stories'
 import tellMe from './assets/tellme.png'
 
 // front -> the image button
@@ -14,17 +15,14 @@ const TYPE_INTERVAL_MS = 56
 const LINE_1 = 'A fost odată...'
 const LINE_2 = 'Ca niciodată...'
 
-const MOCK_STORY = `A fost odată ca niciodată un băiețel pe nume Adam, care locuia într-o căsuță cu acoperiș roșu, la marginea unei păduri liniștite. În fiecare seară, luna se apleca peste fereastra lui ca să-i spună noapte bună.
-
-Într-o seară, Adam a găsit pe pervaz o steluță mică, obosită de atâta strălucit. A învelit-o încet într-o batistă moale și i-a șoptit o poveste, până când steluța a adormit zâmbind.
-
-Dimineața, steluța s-a trezit odihnită și i-a mulțumit lui Adam cu o lumină caldă, mică de tot, cât un bob de grâu. Apoi i-a arătat un drum subțire de sclipici, care pornea de la fereastră și mergea până în pădure. Adam și-a pus papucii, a luat steluța în palmă și a pășit încet, să nu trezească iarba.
-
-În pădure, toate lucrurile vorbeau în șoaptă: frunzele spuneau „bună dimineața", ciupercile își ridicau pălăriile, iar un arici somnoros i-a arătat lui Adam unde se ascunde roua. La capătul drumului, băiețelul a găsit un leagăn prins între doi nori mici. S-a urcat în el, iar steluța l-a legănat ușor, până când lumea întreagă a început să pară o poveste moale și bună.`
-
-const STORY_PARAGRAPHS = MOCK_STORY.split('\n\n')
 // Narrated in chunks of two paragraphs, with a lullaby-only pause between
-const NARRATION_CHUNKS = [STORY_PARAGRAPHS.slice(0, 2).join('\n\n'), STORY_PARAGRAPHS.slice(2, 4).join('\n\n')]
+function narrationChunks(story: Story) {
+  const chunks: string[] = []
+  for (let i = 0; i < story.paragraphs.length; i += 2) {
+    chunks.push(story.paragraphs.slice(i, i + 2).join('\n\n'))
+  }
+  return chunks
+}
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -91,6 +89,21 @@ export default function App() {
   const [expanded, setExpanded] = useState(false)
   const [storyVisible, setStoryVisible] = useState(false)
   const [paused, setPaused] = useState(false)
+  const [storyId, setStoryId] = useState(1)
+  const storyContentRef = useRef<HTMLSpanElement>(null)
+
+  const selectedStory = STORIES.find((story) => story.id === storyId) ?? STORIES[0]
+
+  function selectStory(id: number) {
+    if (id === storyId) {
+      return
+    }
+    setStoryId(id)
+    setPaused(false)
+    const story = STORIES.find((candidate) => candidate.id === id) ?? STORIES[0]
+    startNarration(id, narrationChunks(story))
+    storyContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   function toggleStoryAudio() {
     if (paused) {
@@ -107,7 +120,7 @@ export default function App() {
       return
     }
     startLullaby()
-    prefetchNarration(NARRATION_CHUNKS)
+    prefetchNarration(selectedStory.id, narrationChunks(selectedStory))
     setPhase('back')
     // The CSS flip animation runs 700ms; the faces swap at the 90° edge-on
     // midpoint (350ms), driven from React so no filled CSS animation lingers.
@@ -124,7 +137,7 @@ export default function App() {
     setExpanded(true)
     await wait(900)
     setStoryVisible(true)
-    playNarration()
+    startNarration(selectedStory.id, narrationChunks(selectedStory))
   }
 
   return (
@@ -136,7 +149,7 @@ export default function App() {
           </GlassButton>
         </div>
         <div className="flip-face flip-face--back">
-          <GlassButton fill silent onClick={flipCard}>
+          <GlassButton fill silent onClick={flipCard} contentRef={storyContentRef}>
             <i className="loading-text">
               <TypedLine text={LINE_1} active={line1Active} />
               <br />
@@ -144,8 +157,25 @@ export default function App() {
                 <TypedLine text={LINE_2} active={line2Active} />
               </span>
             </i>
-            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>{MOCK_STORY}</div>
+            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>{selectedStory.paragraphs.join('\n\n')}</div>
           </GlassButton>
+          {storyVisible && (
+            <div className="story-picker">
+              {STORIES.map((story) => (
+                <button
+                  key={story.id}
+                  className={story.id === storyId ? 'story-picker-button story-picker-button--active' : 'story-picker-button'}
+                  onClick={() => selectStory(story.id)}
+                  // Prefetch on hover so the ElevenLabs round trip is already
+                  // underway by the time the user clicks.
+                  onPointerEnter={() => prefetchNarration(story.id, narrationChunks(story))}
+                  aria-label={`Povestea ${story.id}`}
+                >
+                  {story.id}
+                </button>
+              ))}
+            </div>
+          )}
           {storyVisible && (
             <button className="pause-button" onClick={toggleStoryAudio} aria-label={paused ? 'Continuă' : 'Pauză'}>
               {paused ? <PlayIcon /> : <PauseIcon />}
