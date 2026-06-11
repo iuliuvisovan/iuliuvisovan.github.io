@@ -11,6 +11,8 @@ type Env = {
 // Browser callers we allow (CORS). Add more origins if you serve from elsewhere.
 const ALLOWED_ORIGINS = [
   'https://iuliuvisovan.github.io',
+  'https://www.iuliu.net',
+  'https://iuliu.net',
   'http://localhost:5173',
 ]
 
