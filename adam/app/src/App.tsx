@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import GlassButton from './components/GlassButton'
 import { startLullaby } from './lullaby'
+import { prefetchNarration, playNarration } from './narration'
 import tellMe from './assets/tellme.png'
 
 // front -> the image button
@@ -21,6 +22,9 @@ Drept mulțumire, steluța i-a presărat pe pernă un praf auriu de vise frumoas
 
 // Doubled for now so the expanded card has enough content to scroll
 const LONG_STORY = `${MOCK_STORY}\n\n${MOCK_STORY}`
+
+// Only the first two paragraphs get narrated for now
+const NARRATION_TEXT = MOCK_STORY.split('\n\n').slice(0, 2).join('\n\n')
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -75,6 +79,7 @@ export default function App() {
       return
     }
     startLullaby()
+    prefetchNarration(NARRATION_TEXT)
     setPhase('back')
     // The CSS flip animation runs 700ms; the faces swap at the 90° edge-on
     // midpoint (350ms), driven from React so no filled CSS animation lingers.
@@ -91,6 +96,7 @@ export default function App() {
     setExpanded(true)
     await wait(900)
     setStoryVisible(true)
+    playNarration()
   }
 
   return (
@@ -102,7 +108,7 @@ export default function App() {
           </GlassButton>
         </div>
         <div className="flip-face flip-face--back">
-          <GlassButton fill onClick={flipCard}>
+          <GlassButton fill silent onClick={flipCard}>
             <i className="loading-text">
               <TypedLine text={LINE_1} active={line1Active} />
               <br />

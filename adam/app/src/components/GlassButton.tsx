@@ -7,13 +7,20 @@ type Props = {
   // When true, the glass stretches to fill its parent (used for the flip's
   // back face so both faces share the front's size). Default auto-sizes.
   fill?: boolean
+  // When true, skips the hover whoosh sounds (used for the back face, whose
+  // scrollable span re-enables pointer events and would otherwise fire them).
+  silent?: boolean
 }
 
 // Liquid-glass button (Petr-Knoll "Glass Button"). Styles live in glass.css.
-export default function GlassButton({ children, onClick, fill }: Props) {
+export default function GlassButton({ children, onClick, fill, silent = false }: Props) {
   return (
     <div className={fill ? 'button-wrap button-wrap--fill' : 'button-wrap'}>
-      <button onClick={onClick} onPointerEnter={playWhooshIn} onPointerLeave={playWhooshOut}>
+      <button
+        onClick={onClick}
+        onPointerEnter={silent ? undefined : playWhooshIn}
+        onPointerLeave={silent ? undefined : playWhooshOut}
+      >
         <span>{children}</span>
       </button>
       <div className="button-shadow"></div>

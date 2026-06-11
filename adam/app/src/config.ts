@@ -6,4 +6,4 @@ export const STORY_API_URL =
   'https://adam-story.iuliuvisovan.workers.dev'
 
 // Flip to true to re-enable all sounds.
-export const SOUNDS_ENABLED = false
+export const SOUNDS_ENABLED = true

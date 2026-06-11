@@ -3,7 +3,7 @@ import lullabyUrl from './assets/lullaby.mp3'
 
 let audio: HTMLAudioElement | null = null
 
-const TARGET_VOLUME = 0.4
+export const TARGET_VOLUME = 0.4
 const FADE_MS = 3000
 const FADE_STEP_MS = 100
 
@@ -34,4 +34,13 @@ export function startLullaby() {
   }, FADE_STEP_MS)
 
   audio.play().catch(() => {})
+}
+
+// Sets the lullaby volume directly (clamped 0..1). Used by narration to duck
+// the lullaby while the story is being read, then restore it.
+export function setLullabyVolume(volume: number) {
+  if (!audio) {
+    return
+  }
+  audio.volume = Math.min(Math.max(volume, 0), 1)
 }
