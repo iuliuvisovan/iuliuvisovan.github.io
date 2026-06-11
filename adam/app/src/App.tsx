@@ -13,6 +13,15 @@ const TYPE_INTERVAL_MS = 56
 const LINE_1 = 'A fost odată...'
 const LINE_2 = 'Ca niciodată...'
 
+const MOCK_STORY = `A fost odată ca niciodată un băiețel pe nume Adam, care locuia într-o căsuță cu acoperiș roșu, la marginea unei păduri liniștite. În fiecare seară, luna se apleca peste fereastra lui ca să-i spună noapte bună.
+
+Într-o seară, Adam a găsit pe pervaz o steluță mică, obosită de atâta strălucit. A învelit-o încet într-o batistă moale și i-a șoptit o poveste, până când steluța a adormit zâmbind.
+
+Drept mulțumire, steluța i-a presărat pe pernă un praf auriu de vise frumoase. Adam a închis ochii, a tras plapuma până la bărbie și a plutit lin spre tărâmul somnului, unde toate poveștile încep cu „a fost odată”.`
+
+// Doubled for now so the expanded card has enough content to scroll
+const LONG_STORY = `${MOCK_STORY}\n\n${MOCK_STORY}`
+
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -58,6 +67,8 @@ export default function App() {
   const [face, setFace] = useState<Phase>('front')
   const [line1Active, setLine1Active] = useState(false)
   const [line2Active, setLine2Active] = useState(false)
+  const [expanded, setExpanded] = useState(false)
+  const [storyVisible, setStoryVisible] = useState(false)
 
   async function flipCard() {
     if (phase === 'back') {
@@ -74,11 +85,17 @@ export default function App() {
     // Line 1 finishes typing, then an 800ms breath before line 2 starts
     await wait(LINE_1.length * TYPE_INTERVAL_MS + 800)
     setLine2Active(true)
+    // Line 2 finishes typing, an 800ms breath, then the card expands (900ms
+    // CSS transition) and the story fades in once the expansion settles.
+    await wait(LINE_2.length * TYPE_INTERVAL_MS + 800)
+    setExpanded(true)
+    await wait(900)
+    setStoryVisible(true)
   }
 
   return (
     <div className="scene">
-      <div className="flip" data-phase={phase} data-face={face}>
+      <div className="flip" data-phase={phase} data-face={face} data-expanded={expanded ? 'true' : 'false'}>
         <div className="flip-face flip-face--front">
           <GlassButton onClick={flipCard}>
             <img className="button-image" src={tellMe} alt="Tell me a story" />
@@ -93,6 +110,7 @@ export default function App() {
                 <TypedLine text={LINE_2} active={line2Active} />
               </span>
             </i>
+            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>{LONG_STORY}</div>
           </GlassButton>
         </div>
       </div>

@@ -143,7 +143,6 @@ button {
   /* Basic Styling */
   --border-width: clamp(1px, 0.0625em, 4px);
   all: unset;
-  cursor: pointer;
   position: relative;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   pointer-events: auto;
@@ -166,7 +165,12 @@ button {
   transition: all var(--anim--hover-time) var(--anim--hover-ease);
 }
 
-button:hover {
+/* Hover effects (and the pointer cursor) are front-face only: the flipped card is permanently inert. */
+.flip-face--front button {
+  cursor: pointer;
+}
+
+.flip-face--front button:hover {
   transform: scale(0.975);
   backdrop-filter: blur(0.01em);
   -webkit-backdrop-filter: blur(0.01em);
@@ -219,7 +223,7 @@ button span i {
   transition: filter var(--anim--hover-time) var(--anim--hover-ease);
 }
 
-button:hover span i {
+.flip-face--front button:hover span i {
   filter: drop-shadow(0.025em 0.025em 0.03em rgba(0, 0, 0, 0.175))
     drop-shadow(0 0 0.15em rgba(255, 255, 255, 0.56));
 }
@@ -255,7 +259,7 @@ button > span::after {
     --angle-2 calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease);
 }
 
-button:hover > span::after {
+.flip-face--front button:hover > span::after {
   background-position: 25% 50%;
 }
 
@@ -298,25 +302,25 @@ button::after {
   box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
 }
 
-button:hover::after {
+.flip-face--front button:hover::after {
   --angle-1: -131deg;
 }
 
 @media (hover: none) and (pointer: coarse) {
   button::after,
-  button:hover::after {
+  .flip-face--front button:hover::after {
     --angle-1: -75deg;
   }
 }
 
 /* Shadow Hover */
-.button-wrap:has(button:hover) .button-shadow {
+.flip-face--front .button-wrap:has(button:hover) .button-shadow {
   filter: blur(clamp(2px, 0.0625em, 6px));
   -webkit-filter: blur(clamp(2px, 0.0625em, 6px));
   transition: filter var(--anim--hover-time) var(--anim--hover-ease);
 }
 
-.button-wrap:has(button:hover) .button-shadow::after {
+.flip-face--front .button-wrap:has(button:hover) .button-shadow::after {
   top: calc(var(--shadow-cuttoff-fix) - 0.875em);
   opacity: 1;
 }
@@ -425,6 +429,15 @@ button:hover::after {
   width: 486px;
   height: 325px;
   box-sizing: border-box;
+  /* Later list items win for width/height; everything else keeps the hover timing. */
+  transition: all var(--anim--hover-time) var(--anim--hover-ease), width 900ms var(--anim--hover-ease), height 900ms var(--anim--hover-ease);
+}
+
+/* The hidden front button is the card's sizing element, so animating it grows
+   the whole card; the back face tracks via inset 0. */
+.flip[data-expanded="true"] .flip-face--front button {
+  width: min(768px, calc(100vw - 32px));
+  height: 90vh;
 }
 
 /* The structural span fills the fixed button; its em padding stays inside
@@ -466,12 +479,42 @@ button:hover::after {
   display: none;
 }
 
+/* Back face content stacks vertically (label lines, then story) and stays
+   centered; the span's existing em padding remains inside via border-box. */
+.flip-face--back button > span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Expanded: title pinned to the top, the whole content column scrolls inside
+   the glass, with soft fade masks at both edges. justify-content must be
+   flex-start — a center-justified flex container can't scroll to its overflow. */
+.flip[data-expanded="true"] .flip-face--back button > span {
+  justify-content: flex-start;
+  overflow-y: auto;
+  pointer-events: auto;
+  scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 7%, #000 90%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 7%, #000 90%, transparent 100%);
+}
+
+.flip[data-expanded="true"] .flip-face--back button > span::-webkit-scrollbar {
+  display: none;
+}
+
 /* "A fost odată ca niciodată…" label on the back face */
 .loading-text {
   display: inline-block;
+  flex-shrink: 0;
   font-size: 0.92em;
   /* Overrides the inherited line box height from the button's font scale */
-  line-height: 1.3;
+  line-height: 1.1;
   white-space: nowrap;
   text-align: center;
   /* White glow via drop-shadow because text-shadow can't work on clipped-gradient
@@ -491,5 +534,31 @@ button:hover::after {
 /* Untyped remainder of a typed line: hidden but still reserves its width */
 .untyped {
   visibility: hidden;
+}
+
+/* Story area on the back face: fades in once the card has expanded. */
+.story-text {
+  opacity: 0;
+  transition: opacity 800ms ease;
+  font-size: 24px;
+  line-height: 1.5;
+  font-family: "Baloo 2", sans-serif;
+  color: #6b4525;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.8), 0 0 18px rgba(255, 255, 255, 0.5);
+  white-space: pre-line;
+  text-align: center;
+  max-width: 100%;
+  flex-shrink: 0;
+}
+
+.story-text--visible {
+  opacity: 1;
+}
+
+/* Keep the story out of layout entirely at the fixed 486x325 size; it enters
+   layout (still opacity 0) the moment expansion starts, then fades in when
+   the --visible class lands 900ms later. */
+.flip[data-expanded="false"] .story-text {
+  display: none;
 }
 
