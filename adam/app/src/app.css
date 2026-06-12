@@ -1,0 +1,336 @@
+:root {
+  --global--size: clamp(2rem, 4vw, 5rem);
+  --anim--hover-time: 400ms;
+  --anim--hover-ease: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* React mounts into #root; display:contents lets body's flex centering act
+   directly on the app's phase element, as if it were body's child. */
+#root {
+  display: contents;
+}
+
+/* Base Styles */
+body {
+  width: 100%;
+  height: 100vh;
+  /* Dynamic viewport so content centers under mobile URL bars */
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  font-size: var(--global--size);
+  background-color: #f4ecdd;
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* Rocking background: oversized fixed layer pivoting around a point far
+   below the screen, tilting gently like a rocking chair on a wide arc. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -8%;
+  z-index: -1;
+  background-image: url("./assets/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform-origin: 50% 400%;
+  animation: rock-sway 7s ease-in-out infinite, rock-dip 3.5s ease-in-out infinite;
+  will-change: rotate, translate;
+}
+
+/* Sway and dip run as separate animations on the standalone rotate/translate
+   properties: the dip cycles at twice the sway frequency (lowest at each swing
+   extreme, highest through center), and with only end-point keyframes per
+   track the easing never brakes mid-swing. */
+@keyframes rock-sway {
+  0%, 100% {
+    rotate: -0.3deg;
+  }
+  50% {
+    rotate: 0.3deg;
+  }
+}
+
+@keyframes rock-dip {
+  0%, 100% {
+    translate: 0 6px;
+  }
+  50% {
+    translate: 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}
+
+/* ========== TELL ME BUTTON ========== */
+
+.tell-button {
+  all: unset;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  transition: scale var(--anim--hover-time) var(--anim--hover-ease), opacity 700ms ease;
+}
+
+.tell-button:hover {
+  scale: 1.04;
+}
+
+.tell-button--fading {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tell-button img {
+  display: block;
+  width: min(360px, 68vw);
+  height: auto;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.18));
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ========== INTRO LINES ========== */
+
+.intro-text {
+  font-family: "Baloo 2", sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.85rem, 3.7vw, 4.6rem);
+  line-height: 1.1;
+  white-space: nowrap;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  background: linear-gradient(90deg, #964e11 0%, #b86824 50%, #964e11 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  /* White glow via drop-shadow because text-shadow can't work on
+     clipped-gradient text. */
+  filter: drop-shadow(0 0 0.12em rgba(255, 255, 255, 0.9)) drop-shadow(0 0 0.35em rgba(255, 255, 255, 0.6)) drop-shadow(0 0 0.7em rgba(255, 255, 255, 0.35));
+  transition: opacity 700ms ease;
+}
+
+.intro-text--fading {
+  opacity: 0;
+}
+
+/* Second line is typed letter by letter from React state. The span carries its
+   own clipped gradient since the inherited transparent text fill needs a
+   painted background on this element. */
+.intro-line2 {
+  background: linear-gradient(90deg, #964e11 0%, #b86824 50%, #964e11 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* Untyped remainder of a typed line: hidden but still reserves its width */
+.untyped {
+  visibility: hidden;
+}
+
+/* ========== STORY ========== */
+
+/* The positioned coordinate space shared by the scrolling text and the glass
+   pill: the scroller is deliberately unpositioned so the paragraphs'
+   offsetParent is the stage, the same element the pill is absolute in. */
+.story-stage {
+  position: relative;
+  width: min(768px, calc(100vw - 32px));
+  height: 90vh;
+  /* Dynamic viewport so the stage centers under mobile URL bars */
+  height: 90dvh;
+  opacity: 0;
+  transition: opacity 800ms ease;
+}
+
+.story-stage--visible {
+  opacity: 1;
+}
+
+/* The scrolling story column, with soft fade masks at both edges. The
+   mask-image creates a backdrop root, which is why the glass pill lives
+   outside as a sibling. */
+.story-scroll {
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none;
+  box-sizing: border-box;
+  padding-inline: 24px;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 56px, #000 136px, #000 90%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 56px, #000 136px, #000 90%, transparent 100%);
+}
+
+.story-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.story-text {
+  font-size: 26px;
+  line-height: 1.5;
+  font-family: "Baloo 2", sans-serif;
+  color: #6b4525;
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.8), 0 0 18px rgba(255, 255, 255, 0.5);
+  text-align: center;
+  /* clears the floating story picker above and the top mask band */
+  padding-top: 140px;
+  /* clears the floating pause button so the last line can scroll above it */
+  padding-bottom: 120px;
+}
+
+/* One story paragraph. Layout-only: the narration highlight is the
+   .story-glass-pill overlay, positioned over the active paragraph from JS.
+   The transparent border stays so the active state never shifts layout. */
+.story-paragraph {
+  margin: 0 0 16px;
+  padding: 16px;
+  border-radius: 42px;
+  border: 1px solid transparent;
+}
+
+/* .story-paragraph--active is a marker class only: JS finds the active
+   paragraph through it and the pill provides the visuals. Glass on the
+   paragraph itself can't work, it lives inside the masked scroller, and a
+   mask-image creates a backdrop root, so a descendant backdrop-filter can
+   never sample the page background. */
+
+/* The narration highlight: a JS-positioned overlay inside .story-stage,
+   sharing the paragraphs' offsetParent coordinate space (scroll is countered
+   via transform from JS). transform is deliberately NOT transitioned: it
+   tracks scrollTop and must be instant, while the top/left/width/height morph
+   between paragraphs animates. */
+.story-glass-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: linear-gradient(
+    -75deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.2)
+  );
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2);
+  transition: top 0.8s var(--anim--hover-ease), left 0.8s var(--anim--hover-ease),
+    width 0.8s var(--anim--hover-ease), height 0.8s var(--anim--hover-ease),
+    opacity 0.8s ease;
+}
+
+/* Floating circular glass pause/play control over the story */
+.pause-button {
+  all: unset;
+  cursor: pointer;
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  translate: -50% 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 251, 245, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
+  z-index: 3;
+  transition: background var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease), scale var(--anim--hover-time) var(--anim--hover-ease);
+}
+
+.pause-button:hover {
+  background: rgba(255, 251, 245, 0.55);
+  scale: 1.07;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+}
+
+/* Floating row of numbered story-picker controls at the top of the story */
+.story-picker {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  translate: -50% 0;
+  display: flex;
+  gap: 12px;
+  z-index: 3;
+}
+
+.story-picker-button {
+  all: unset;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 251, 245, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
+  font-family: "Baloo 2", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #964e11;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease), scale var(--anim--hover-time) var(--anim--hover-ease);
+}
+
+.story-picker-button:hover {
+  background: rgba(255, 251, 245, 0.55);
+  scale: 1.07;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+}
+
+/* Selected story: near-solid white fill, no ring; the faint siblings make it
+   read as selected at a glance. The :hover pairing keeps the fill from being
+   overridden while hovering the active button. */
+.story-picker-button--active,
+.story-picker-button--active:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ========== MOBILE ========== */
+
+@media (max-width: 520px) {
+  /* Bottom fade band shifted ~50px up so text dissolves above the controls;
+     top edge keeps the desktop fade. Side padding halved so the story gets
+     more line width on a phone. */
+  .story-scroll {
+    padding-inline: 12px;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 56px, #000 136px, #000 calc(100% - 114px), transparent calc(100% - 44px));
+    mask-image: linear-gradient(to bottom, transparent 56px, #000 136px, #000 calc(100% - 114px), transparent calc(100% - 44px));
+  }
+
+  /* Numbers row sits 40px higher on a phone */
+  .story-picker {
+    top: -16px;
+  }
+
+  /* Pause control needs extra clearance below it on a phone */
+  .pause-button {
+    bottom: 0px;
+  }
+}

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import GlassButton from './components/GlassButton'
 import tellMe from './assets/tellme.png'
 import { startLullaby } from './lullaby'
 import { playWhoosh } from './whoosh'
@@ -7,9 +6,10 @@ import { playIntro } from './intro'
 import { startNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
 import { STORIES } from './stories'
 
-// front -> the image button
-// back  -> flipped, "A fost odată..." label
-type Phase = 'front' | 'back'
+// button -> the image button on the background
+// intro  -> "A fost odată..." typed lines on the background
+// story  -> the story player
+type Phase = 'button' | 'intro' | 'story'
 
 // Delay between typed letters in TypedLine
 const TYPE_INTERVAL_MS = 56
@@ -75,29 +75,30 @@ function PlayIcon() {
 }
 
 export default function App() {
-  const [phase, setPhase] = useState<Phase>('front')
-  const [face, setFace] = useState<Phase>('front')
+  const [phase, setPhase] = useState<Phase>('button')
+  const [buttonFading, setButtonFading] = useState(false)
   const [line1Active, setLine1Active] = useState(false)
   const [line2Active, setLine2Active] = useState(false)
-  const [expanded, setExpanded] = useState(false)
-  const [storyVisible, setStoryVisible] = useState(false)
+  const [introFading, setIntroFading] = useState(false)
+  const [storyShown, setStoryShown] = useState(false)
   const [paused, setPaused] = useState(false)
   const [storyId, setStoryId] = useState(1)
-  // Index of the narration chunk currently speaking; its two paragraphs get
-  // the highlight. Null before playback and after stopNarration.
+  // Index of the narration chunk currently speaking; its paragraph gets the
+  // highlight. Null before playback and after stopNarration.
   const [activeChunk, setActiveChunk] = useState<number | null>(null)
-  const storyContentRef = useRef<HTMLSpanElement>(null)
-  // The glass highlight is a JS-positioned overlay living in the <button>,
-  // outside the masked scrolling span — the span's mask-image creates a
-  // backdrop root, so a backdrop-filter inside it could never blur the page.
+  const storyContentRef = useRef<HTMLDivElement>(null)
+  // The glass highlight is a JS-positioned overlay living in .story-stage,
+  // outside the masked scroller, the scroller's mask-image creates a backdrop
+  // root, so a backdrop-filter inside it could never blur the page.
   const glassPillRef = useRef<HTMLDivElement>(null)
 
   const selectedStory = STORIES.find((story) => story.id === storyId) ?? STORIES[0]
 
-  // Moves the pill onto the active paragraph. Both the <p> (via the positioned
-  // <button>, its offsetParent) and the pill share the button's coordinate
-  // space, which does not change with scroll — so offset* values map directly
-  // onto the pill's top/left, and CSS transitions animate the morph.
+  // Moves the pill onto the active paragraph. Both the <p> (via .story-stage,
+  // its offsetParent, the scroller is unpositioned) and the pill share the
+  // stage's coordinate space, which does not change with scroll, so offset*
+  // values map directly onto the pill's top/left, and CSS transitions animate
+  // the morph.
   function placeGlassPill() {
     const pill = glassPillRef.current
     const container = storyContentRef.current
@@ -121,7 +122,11 @@ export default function App() {
   // The text scrolls but the pill does not: track scrollTop with a transform.
   // transform is deliberately excluded from the pill's CSS transition list so
   // this tracking is instant, while top/left/width/height morphs stay animated.
+  // The scroller only exists in the story phase, so listeners attach then.
   useEffect(() => {
+    if (phase !== 'story') {
+      return
+    }
     const container = storyContentRef.current
     if (!container) {
       return
@@ -138,12 +143,12 @@ export default function App() {
       window.removeEventListener('resize', placeGlassPill)
       container.removeEventListener('scroll', followScroll)
     }
-  }, [])
+  }, [phase])
 
-  // Keep the narrated paragraphs in view: when the active chunk changes,
-  // scroll the story container so the chunk's first paragraph sits 120px below
-  // the top. offsetTop is relative to the positioned <button>, not the scrolling
-  // span, so the target comes from rect difference plus current scrollTop.
+  // Keep the narrated paragraph in view: when the active chunk changes,
+  // scroll the story container so the paragraph sits 120px below the top.
+  // offsetTop is relative to the positioned .story-stage, not the scroller,
+  // so the target comes from rect difference plus current scrollTop.
   useEffect(() => {
     if (activeChunk === null) {
       const pill = glassPillRef.current
@@ -190,55 +195,57 @@ export default function App() {
     }
   }
 
-  async function flipCard() {
-    if (phase === 'back') {
+  async function beginStorySequence() {
+    if (phase !== 'button' || buttonFading) {
       return
     }
     startLullaby()
     playWhoosh()
     setTimeout(() => playIntro(), 1000)
-    setPhase('back')
-    // The CSS flip animation runs 700ms; the faces swap at the 90° edge-on
-    // midpoint (350ms), driven from React so no filled CSS animation lingers.
-    await wait(350)
-    setFace('back')
-    await wait(350)
+    setButtonFading(true)
+    await wait(700)
+    setPhase('intro')
+    await wait(20)
     setLine1Active(true)
     // Line 1 finishes typing, then an 800ms breath before line 2 starts
     await wait(LINE_1.length * TYPE_INTERVAL_MS + 800)
     setLine2Active(true)
-    // Line 2 finishes typing, an 800ms breath, then the card expands (900ms
-    // CSS transition) and the story fades in once the expansion settles.
+    // Line 2 finishes typing, an 800ms breath, then the intro fades out
     await wait(LINE_2.length * TYPE_INTERVAL_MS + 800)
-    setExpanded(true)
-    await wait(900)
-    setStoryVisible(true)
+    setIntroFading(true)
+    await wait(700)
+    setPhase('story')
+    // The stage mounts at opacity 0; a beat later the visible class lands so
+    // the 800ms fade-in actually transitions instead of snapping.
+    await wait(20)
+    setStoryShown(true)
     playStory(selectedStory.id)
   }
 
   return (
-    <div className="scene">
-      <div className="flip" data-phase={phase} data-face={face} data-expanded={expanded ? 'true' : 'false'}>
-        <div className="flip-face flip-face--front">
-          <GlassButton onClick={flipCard}>
-            <img className="button-image" src={tellMe} alt="Tell me a story" />
-          </GlassButton>
+    <>
+      {phase === 'button' && (
+        <button
+          className={buttonFading ? 'tell-button tell-button--fading' : 'tell-button'}
+          onClick={beginStorySequence}
+        >
+          <img src={tellMe} alt="Tell me a story" />
+        </button>
+      )}
+      {phase === 'intro' && (
+        <div className={introFading ? 'intro-text intro-text--fading' : 'intro-text'}>
+          <TypedLine text={LINE_1} active={line1Active} />
+          <br />
+          <span className="intro-line2">
+            <TypedLine text={LINE_2} active={line2Active} />
+          </span>
         </div>
-        <div className="flip-face flip-face--back">
-          <GlassButton
-            fill
-            onClick={flipCard}
-            contentRef={storyContentRef}
-            overlay={<div className="story-glass-pill" ref={glassPillRef} />}
-          >
-            <i className="loading-text">
-              <TypedLine text={LINE_1} active={line1Active} />
-              <br />
-              <span className="loading-line2">
-                <TypedLine text={LINE_2} active={line2Active} />
-              </span>
-            </i>
-            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>
+      )}
+      {phase === 'story' && (
+        <div className={storyShown ? 'story-stage story-stage--visible' : 'story-stage'}>
+          <div className="story-glass-pill" ref={glassPillRef} />
+          <div className="story-scroll" ref={storyContentRef}>
+            <div className="story-text">
               {selectedStory.paragraphs.map((paragraph, index) => (
                 <p
                   key={index}
@@ -248,28 +255,24 @@ export default function App() {
                 </p>
               ))}
             </div>
-          </GlassButton>
-          {storyVisible && (
-            <div className="story-picker">
-              {STORIES.map((story) => (
-                <button
-                  key={story.id}
-                  className={story.id === storyId ? 'story-picker-button story-picker-button--active' : 'story-picker-button'}
-                  onClick={() => selectStory(story.id)}
-                  aria-label={`Povestea ${story.id}`}
-                >
-                  {story.id}
-                </button>
-              ))}
-            </div>
-          )}
-          {storyVisible && (
-            <button className="pause-button" onClick={toggleStoryAudio} aria-label={paused ? 'Continuă' : 'Pauză'}>
-              {paused ? <PlayIcon /> : <PauseIcon />}
-            </button>
-          )}
+          </div>
+          <div className="story-picker">
+            {STORIES.map((story) => (
+              <button
+                key={story.id}
+                className={story.id === storyId ? 'story-picker-button story-picker-button--active' : 'story-picker-button'}
+                onClick={() => selectStory(story.id)}
+                aria-label={`Povestea ${story.id}`}
+              >
+                {story.id}
+              </button>
+            ))}
+          </div>
+          <button className="pause-button" onClick={toggleStoryAudio} aria-label={paused ? 'Continuă' : 'Pauză'}>
+            {paused ? <PlayIcon /> : <PauseIcon />}
+          </button>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   )
 }
