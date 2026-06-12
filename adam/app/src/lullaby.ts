@@ -3,7 +3,7 @@ import lullabyUrl from './assets/lullaby.mp3'
 
 let audio: HTMLAudioElement | null = null
 
-export const TARGET_VOLUME = 0.4
+export const TARGET_VOLUME = 0.3
 const FADE_MS = 3000
 const FADE_STEP_MS = 100
 

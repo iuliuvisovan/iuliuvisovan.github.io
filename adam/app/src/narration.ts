@@ -7,6 +7,23 @@ import { getLullabyAudio, TARGET_VOLUME } from './lullaby'
 // The chunk urls of the story currently playing
 let activeChunkUrls: string[] = []
 
+// The story currently playing, so playChunk can name it on the lockscreen
+let activeStoryId = 0
+
+// One persistent element plays every chunk; we swap its src between chunks.
+// Mobile browsers apply autoplay rules per element, so a fresh Audio created
+// in a background tab may refuse to play, while this element, blessed by the
+// user gesture that started the story, keeps playing like a playlist.
+let voiceAudio: HTMLAudioElement | null = null
+// The session the persistent element is currently working for, so its
+// once-attached 'ended'/'error' listeners can tell stale events from live ones
+let voiceSession = -1
+// The url currently loaded into the persistent element, so playChunk can skip
+// a redundant src swap when the gap already preloaded the next chunk
+let loadedUrl: string | null = null
+
+// Points at voiceAudio while a chunk is speaking (or paused mid-speech) and is
+// null otherwise, which is what the pause/resume paths key off
 let currentAudio: HTMLAudioElement | null = null
 let betweenTimer: ReturnType<typeof setTimeout> | null = null
 let pausedInGap = false
@@ -30,7 +47,7 @@ let chunkListener: ((chunk: number | null) => void) | null = null
 let session = 0
 
 // How quiet the lullaby gets while the narration is speaking
-const DUCKED_VOLUME = 0.12
+const DUCKED_VOLUME = 0.09
 
 // Per-channel pause flags for the small voice/music toggles. The main
 // pause/resume pair below ignores them on pause (it silences everything) and
@@ -241,6 +258,87 @@ function chunkUrl(storyId: number, index: number) {
   return `${import.meta.env.BASE_URL}audio/story-${storyId}-chunk-${index + 1}.mp3`
 }
 
+// Creates the persistent voice element on first use. Must first run inside a
+// user gesture (startNarration) so the element earns its autoplay blessing.
+// The 'ended'/'error' listeners are attached once and guarded by voiceSession,
+// so events from a stopped story fall through harmlessly.
+function getVoiceAudio(): HTMLAudioElement {
+  if (voiceAudio) {
+    return voiceAudio
+  }
+  const element = new Audio()
+  element.defaultPlaybackRate = PLAYBACK_RATE
+  element.addEventListener('ended', () => {
+    if (voiceSession !== session) {
+      return
+    }
+    currentAudio = null
+    chunkEnded(voiceSession)
+  })
+  element.addEventListener('error', () => {
+    if (voiceSession !== session) {
+      return
+    }
+    // A broken preload during the gap: drop the cached url so playChunk
+    // reloads it, and let the error fire again once the chunk is actually
+    // speaking, where the skip below moves the story along.
+    if (currentAudio !== element) {
+      loadedUrl = null
+      return
+    }
+    currentAudio = null
+    chunkEnded(voiceSession)
+  })
+  voiceAudio = element
+  return element
+}
+
+// At most one pending retry; a second rejection while one is armed is folded
+// into it.
+let retryArmed = false
+
+// Plays the voice element, and if the browser refuses (a background tab with
+// no gesture to spend), arms a one-shot retry for the moment the page becomes
+// visible or focused again, so the chain stalls instead of dying.
+function playVoice(element: HTMLAudioElement, mySession: number) {
+  element.play().catch(() => {
+    if (retryArmed) {
+      return
+    }
+    retryArmed = true
+    const retry = () => {
+      document.removeEventListener('visibilitychange', retry)
+      window.removeEventListener('focus', retry)
+      retryArmed = false
+      if (mySession !== session || voicePaused || currentAudio !== element) {
+        return
+      }
+      element.play().catch(() => {})
+    }
+    document.addEventListener('visibilitychange', retry)
+    window.addEventListener('focus', retry)
+  })
+}
+
+// Lets the lockscreen and notification controls drive the story: metadata
+// names what's playing and the play/pause actions map onto the same pair the
+// big in-app button uses.
+function updateMediaSession(storyId: number, chunkIndex: number) {
+  if (!('mediaSession' in navigator)) {
+    return
+  }
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: `Povestea ${storyId}, Paragraful ${chunkIndex + 1}`,
+    album: 'Povești pentru Adam',
+  })
+  try {
+    navigator.mediaSession.setActionHandler('play', () => resumeStoryAudio())
+    navigator.mediaSession.setActionHandler('pause', () => pauseStoryAudio())
+  } catch {
+    // Older browsers throw on unknown actions; the metadata alone still helps
+  }
+}
+
 // Starts a story from its first chunk: anything still playing or pending from
 // a previous story is stopped, the story's chunk urls are laid out, and the
 // lullaby is brought back in case pauseStoryAudio had silenced it. The
@@ -257,6 +355,7 @@ export function startNarration(storyId: number, texts: string[], storyEnded?: ()
   // Assigned after stopNarration, which clears the previous story's listener
   chunkListener = chunkChanged ?? null
   endedCallback = storyEnded ?? null
+  activeStoryId = storyId
   activeChunkUrls = []
   for (let index = 0; index < texts.length; index += 1) {
     activeChunkUrls.push(chunkUrl(storyId, index))
@@ -283,6 +382,9 @@ export function stopNarration() {
     currentAudio.pause()
     currentAudio = null
   }
+  // A stopped chunk may sit mid-file in the element; forget the url so the
+  // next playChunk reloads it from the start instead of resuming midway
+  loadedUrl = null
 }
 
 // Plays one narration chunk: ducks the lullaby, speaks, then hands off to
@@ -297,8 +399,15 @@ function playChunk(index: number) {
   const mySession = session
   nextChunkIndex = index + 1
   chunkListener?.(index)
+  updateMediaSession(activeStoryId, index)
   const url = activeChunkUrls[index]
-  const narration = new Audio(url)
+  const narration = getVoiceAudio()
+  voiceSession = mySession
+  if (loadedUrl !== url) {
+    narration.src = url
+    loadedUrl = url
+  }
+  // Loading a new resource resets playbackRate to the default, so reassert it
   narration.playbackRate = PLAYBACK_RATE
   narration.volume = 1
   currentAudio = narration
@@ -306,21 +415,7 @@ function playChunk(index: number) {
   if (lullaby && !musicPaused) {
     rampVolume(lullaby, DUCKED_VOLUME, 500)
   }
-  narration.addEventListener('ended', () => {
-    if (mySession !== session) {
-      return
-    }
-    currentAudio = null
-    chunkEnded(mySession)
-  })
-  narration.addEventListener('error', () => {
-    if (mySession !== session) {
-      return
-    }
-    currentAudio = null
-    chunkEnded(mySession)
-  })
-  narration.play().catch(() => {})
+  playVoice(narration, mySession)
 }
 
 // Runs when a chunk finishes speaking (or its fetch failed): the lullaby
@@ -338,6 +433,13 @@ function chunkEnded(mySession: number) {
     rampVolume(lullaby, TARGET_VOLUME, 1000)
   }
   if (nextChunkIndex < activeChunkUrls.length) {
+    // Preload the next chunk right now, while the ended event is still warm:
+    // when the gap timer fires (possibly late in a background tab) the element
+    // only has to play what it already holds
+    const narration = getVoiceAudio()
+    const nextUrl = activeChunkUrls[nextChunkIndex]
+    narration.src = nextUrl
+    loadedUrl = nextUrl
     betweenTimer = setTimeout(() => {
       betweenTimer = null
       if (mySession !== session) {

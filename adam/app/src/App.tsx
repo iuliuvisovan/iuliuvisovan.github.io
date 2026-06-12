@@ -93,9 +93,16 @@ function IconSlash() {
 function VoiceIcon({ slashed }: ChannelIconProps) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="#964e11" aria-hidden="true">
-      <rect x="9" y="2" width="6" height="11" rx="3" />
-      <path d="M5.5 11 a6.5 6.5 0 0 0 13 0" fill="none" stroke="#964e11" strokeWidth="2" strokeLinecap="round" />
-      <line x1="12" y1="17.5" x2="12" y2="21" stroke="#964e11" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M7 2 H17 A4 4 0 0 1 21 6 V13 A4 4 0 0 1 17 17 H10.5 L5.5 21.5 V16.6 A4 4 0 0 1 3 13 V6 A4 4 0 0 1 7 2 Z"
+        fill="none"
+        stroke="#964e11"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <rect x="7" y="5.5" width="10" height="2" rx="1" />
+      <rect x="7" y="9" width="8" height="2" rx="1" />
+      <rect x="7" y="12.5" width="5" height="2" rx="1" />
       {slashed && <IconSlash />}
     </svg>
   )
@@ -134,6 +141,24 @@ export default function App() {
 
   const selectedStory = STORIES.find((story) => story.id === storyId) ?? STORIES[0]
 
+  // The pill's fade mask reuses the stage's --story-fade-mask gradient, but
+  // the mask box is the pill itself: sizing the mask to the stage and shifting
+  // it up by the pill's visual top (offsetTop minus the countered scrollTop)
+  // pins the gradient to the stage, so the pill dissolves at the same bands
+  // as the masked text.
+  function alignPillMask(pill: HTMLElement, visualTop: number) {
+    const stage = pill.parentElement
+    if (!stage) {
+      return
+    }
+    const size = `100% ${stage.clientHeight}px`
+    const position = `0px ${-visualTop}px`
+    pill.style.setProperty('mask-size', size)
+    pill.style.setProperty('mask-position', position)
+    pill.style.setProperty('-webkit-mask-size', size)
+    pill.style.setProperty('-webkit-mask-position', position)
+  }
+
   // Moves the pill onto the active paragraph. Both the <p> (via .story-stage,
   // its offsetParent, the scroller is unpositioned) and the pill share the
   // stage's coordinate space, which does not change with scroll, so offset*
@@ -157,6 +182,7 @@ export default function App() {
     pill.style.opacity = '1'
     // The pill doesn't live in the scroller, so it counters scroll manually
     pill.style.transform = `translateY(${-container.scrollTop}px)`
+    alignPillMask(pill, paragraph.offsetTop - container.scrollTop)
   }
 
   // The text scrolls but the pill does not: track scrollTop with a transform.
@@ -175,6 +201,7 @@ export default function App() {
       const pill = glassPillRef.current
       if (pill && container) {
         pill.style.transform = `translateY(${-container.scrollTop}px)`
+        alignPillMask(pill, parseFloat(pill.style.top || '0') - container.scrollTop)
       }
     }
     window.addEventListener('resize', placeGlassPill)
