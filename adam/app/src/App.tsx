@@ -4,7 +4,7 @@ import { startLullaby } from './lullaby'
 import { playWhoosh } from './whoosh'
 import { playIntro } from './intro'
 import { startNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
-import { STORIES, type Story } from './stories'
+import { STORIES } from './stories'
 import tellMe from './assets/tellme.png'
 
 // front -> the image button
@@ -16,15 +16,6 @@ const TYPE_INTERVAL_MS = 56
 
 const LINE_1 = 'A fost odată...'
 const LINE_2 = 'Ca niciodată...'
-
-// Narrated in chunks of two paragraphs, with a lullaby-only pause between
-function narrationChunks(story: Story) {
-  const chunks: string[] = []
-  for (let i = 0; i < story.paragraphs.length; i += 2) {
-    chunks.push(story.paragraphs.slice(i, i + 2).join('\n\n'))
-  }
-  return chunks
-}
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -122,7 +113,8 @@ export default function App() {
     const story = STORIES.find((candidate) => candidate.id === id) ?? STORIES[0]
     const index = STORIES.findIndex((candidate) => candidate.id === story.id)
     const next = STORIES[(index + 1) % STORIES.length]
-    startNarration(id, narrationChunks(story), () => playStory(next.id), setActiveChunk)
+    // One narration chunk per paragraph, with a lullaby-only pause between
+    startNarration(id, story.paragraphs, () => playStory(next.id), setActiveChunk)
     storyContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -190,7 +182,7 @@ export default function App() {
               {selectedStory.paragraphs.map((paragraph, index) => (
                 <p
                   key={index}
-                  className={Math.floor(index / 2) === activeChunk ? 'story-paragraph story-paragraph--active' : 'story-paragraph'}
+                  className={index === activeChunk ? 'story-paragraph story-paragraph--active' : 'story-paragraph'}
                 >
                   {paragraph}
                 </p>

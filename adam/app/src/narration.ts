@@ -1,8 +1,8 @@
 import { SOUNDS_ENABLED } from './config'
 import { getLullabyAudio, TARGET_VOLUME } from './lullaby'
 
-// Narration ships as static mp3 files bundled with the site, one file per two
-// story paragraphs, so three chunks per story. No network calls at runtime.
+// Narration ships as static mp3 files bundled with the site, one file per
+// story paragraph, so six chunks per story. No network calls at runtime.
 
 // The chunk urls of the story currently playing
 let activeChunkUrls: string[] = []
@@ -17,7 +17,7 @@ let nextChunkIndex = 0
 // the next story.
 let endedCallback: (() => void) | null = null
 
-// Tells the app which chunk is speaking so it can highlight its paragraphs.
+// Tells the app which chunk is speaking so it can highlight its paragraph.
 // Fired with the index when a chunk starts and with null on stop; the gap
 // between chunks keeps the previous index, so the highlight only moves when
 // the next chunk actually speaks.

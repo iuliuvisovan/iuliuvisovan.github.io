@@ -2,12 +2,11 @@
 //
 // Usage:
 //   node scripts/regen-audio.mjs all            regenerate every chunk of every story
-//   node scripts/regen-audio.mjs 2              regenerate all 3 chunks of story 2
+//   node scripts/regen-audio.mjs 2              regenerate all 6 chunks of story 2
 //   node scripts/regen-audio.mjs 2 1            regenerate only chunk 1 of story 2
 //
 // Stories live in src/stories.ts (5 stories, 6 paragraphs each). Narration is
-// chunked as 2 paragraphs per file: chunk 1 = paragraphs 1-2, chunk 2 =
-// paragraphs 3-4, chunk 3 = paragraphs 5-6. Files are written to
+// chunked as 1 paragraph per file: chunk N = paragraph N. Files are written to
 // public/audio/story-{storyId}-chunk-{chunk}.mp3 (both 1-based).
 //
 // This script calls ElevenLabs directly, NOT the Cloudflare worker: the worker
@@ -19,7 +18,7 @@ import { fileURLToPath } from 'node:url'
 
 const STORY_COUNT = 5
 const PARAGRAPHS_PER_STORY = 6
-const PARAGRAPHS_PER_CHUNK = 2
+const PARAGRAPHS_PER_CHUNK = 1
 const CHUNKS_PER_STORY = PARAGRAPHS_PER_STORY / PARAGRAPHS_PER_CHUNK
 
 // Must stay in sync with worker/src/index.ts
@@ -41,7 +40,7 @@ const devVarsUrl = new URL('../../worker/.dev.vars', import.meta.url)
 function printUsage() {
   console.log('Usage:')
   console.log('  node scripts/regen-audio.mjs all            regenerate every chunk of every story')
-  console.log('  node scripts/regen-audio.mjs 2              regenerate all 3 chunks of story 2')
+  console.log('  node scripts/regen-audio.mjs 2              regenerate all 6 chunks of story 2')
   console.log('  node scripts/regen-audio.mjs 2 1            regenerate only chunk 1 of story 2')
 }
 
