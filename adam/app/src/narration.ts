@@ -17,6 +17,12 @@ let nextChunkIndex = 0
 // the next story.
 let endedCallback: (() => void) | null = null
 
+// Tells the app which chunk is speaking so it can highlight its paragraphs.
+// Fired with the index when a chunk starts and with null on stop; the gap
+// between chunks keeps the previous index, so the highlight only moves when
+// the next chunk actually speaks.
+let chunkListener: ((chunk: number | null) => void) | null = null
+
 // Bumped by stopNarration to invalidate everything in flight. Async work
 // captures the value it started under and bails if the counter has moved on,
 // so switching stories mid-fetch or mid-gap can never start audio from the
@@ -137,11 +143,13 @@ function chunkUrl(storyId: number, index: number) {
 // lullaby is brought back in case pauseStoryAudio had silenced it. The
 // optional `storyEnded` runs GAP_MS after the last chunk finishes, so the app
 // can auto-advance to the next story.
-export function startNarration(storyId: number, texts: string[], storyEnded?: () => void) {
+export function startNarration(storyId: number, texts: string[], storyEnded?: () => void, chunkChanged?: (chunk: number | null) => void) {
   if (!SOUNDS_ENABLED) {
     return
   }
   stopNarration()
+  // Assigned after stopNarration, which clears the previous story's listener
+  chunkListener = chunkChanged ?? null
   endedCallback = storyEnded ?? null
   activeChunkUrls = []
   for (let index = 0; index < texts.length; index += 1) {
@@ -162,6 +170,9 @@ export function stopNarration() {
   }
   pausedInGap = false
   endedCallback = null
+  // Clear the highlight before dropping the listener
+  chunkListener?.(null)
+  chunkListener = null
   if (currentAudio) {
     currentAudio.pause()
     currentAudio = null
@@ -174,6 +185,7 @@ export function stopNarration() {
 function playChunk(index: number) {
   const mySession = session
   nextChunkIndex = index + 1
+  chunkListener?.(index)
   const url = activeChunkUrls[index]
   const narration = new Audio(url)
   narration.volume = 1

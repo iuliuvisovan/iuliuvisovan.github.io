@@ -92,9 +92,29 @@ export default function App() {
   const [storyVisible, setStoryVisible] = useState(false)
   const [paused, setPaused] = useState(false)
   const [storyId, setStoryId] = useState(1)
+  // Index of the narration chunk currently speaking; its two paragraphs get
+  // the highlight. Null before playback and after stopNarration.
+  const [activeChunk, setActiveChunk] = useState<number | null>(null)
   const storyContentRef = useRef<HTMLSpanElement>(null)
 
   const selectedStory = STORIES.find((story) => story.id === storyId) ?? STORIES[0]
+
+  // Keep the narrated paragraphs in view: when the active chunk changes,
+  // scroll the story container so the chunk's first paragraph sits 200px below
+  // the top. offsetTop is relative to the positioned <button>, not the scrolling
+  // span, so the target comes from rect difference plus current scrollTop.
+  useEffect(() => {
+    if (activeChunk === null) {
+      return
+    }
+    const container = storyContentRef.current
+    const paragraph = container?.querySelector('.story-paragraph--active') as HTMLElement | null
+    if (!container || !paragraph) {
+      return
+    }
+    const top = paragraph.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 200
+    container.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' })
+  }, [activeChunk])
 
   function playStory(id: number) {
     setStoryId(id)
@@ -102,7 +122,7 @@ export default function App() {
     const story = STORIES.find((candidate) => candidate.id === id) ?? STORIES[0]
     const index = STORIES.findIndex((candidate) => candidate.id === story.id)
     const next = STORIES[(index + 1) % STORIES.length]
-    startNarration(id, narrationChunks(story), () => playStory(next.id))
+    startNarration(id, narrationChunks(story), () => playStory(next.id), setActiveChunk)
     storyContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
@@ -129,7 +149,7 @@ export default function App() {
     }
     startLullaby()
     playWhoosh()
-    playIntro()
+    setTimeout(() => playIntro(), 1000)
     setPhase('back')
     // The CSS flip animation runs 700ms; the faces swap at the 90° edge-on
     // midpoint (350ms), driven from React so no filled CSS animation lingers.
@@ -166,7 +186,16 @@ export default function App() {
                 <TypedLine text={LINE_2} active={line2Active} />
               </span>
             </i>
-            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>{selectedStory.paragraphs.join('\n\n')}</div>
+            <div className={storyVisible ? 'story-text story-text--visible' : 'story-text'}>
+              {selectedStory.paragraphs.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className={Math.floor(index / 2) === activeChunk ? 'story-paragraph story-paragraph--active' : 'story-paragraph'}
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
           </GlassButton>
           {storyVisible && (
             <div className="story-picker">
