@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import tellMe from './assets/tellme.png'
 import { startLullaby } from './lullaby'
 import { playWhoosh } from './whoosh'
-import { playIntro } from './intro'
-import { startNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
+import { playSparkles } from './sparkles'
+import { playWriting } from './writing'
+import { startNarration, pauseStoryAudio, resumeStoryAudio, pauseVoice, resumeVoice, pauseMusic, resumeMusic } from './narration'
 import { STORIES } from './stories'
 
 // button -> the image button on the background
@@ -74,6 +75,43 @@ function PlayIcon() {
   )
 }
 
+type ChannelIconProps = {
+  slashed: boolean
+}
+
+// Diagonal slash drawn over a channel icon when that channel is paused. The
+// faint white casing keeps the slash readable over the brown icon shapes.
+function IconSlash() {
+  return (
+    <>
+      <line x1="4" y1="4" x2="20" y2="20" stroke="rgba(255,255,255,0.9)" strokeWidth="4" strokeLinecap="round" />
+      <line x1="4" y1="4" x2="20" y2="20" stroke="#964e11" strokeWidth="2" strokeLinecap="round" />
+    </>
+  )
+}
+
+function VoiceIcon({ slashed }: ChannelIconProps) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="#964e11" aria-hidden="true">
+      <rect x="9" y="2" width="6" height="11" rx="3" />
+      <path d="M5.5 11 a6.5 6.5 0 0 0 13 0" fill="none" stroke="#964e11" strokeWidth="2" strokeLinecap="round" />
+      <line x1="12" y1="17.5" x2="12" y2="21" stroke="#964e11" strokeWidth="2" strokeLinecap="round" />
+      {slashed && <IconSlash />}
+    </svg>
+  )
+}
+
+function MusicIcon({ slashed }: ChannelIconProps) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="#964e11" aria-hidden="true">
+      <circle cx="9" cy="17.5" r="3.5" />
+      <rect x="10.5" y="4" width="2" height="14" />
+      <path d="M12.5 4 q4.5 1 4.5 5.5 q-2 -2.5 -4.5 -2.5 Z" />
+      {slashed && <IconSlash />}
+    </svg>
+  )
+}
+
 export default function App() {
   const [phase, setPhase] = useState<Phase>('button')
   const [buttonFading, setButtonFading] = useState(false)
@@ -82,6 +120,8 @@ export default function App() {
   const [introFading, setIntroFading] = useState(false)
   const [storyShown, setStoryShown] = useState(false)
   const [paused, setPaused] = useState(false)
+  const [voicePaused, setVoicePaused] = useState(false)
+  const [musicPaused, setMusicPaused] = useState(false)
   const [storyId, setStoryId] = useState(1)
   // Index of the narration chunk currently speaking; its paragraph gets the
   // highlight. Null before playback and after stopNarration.
@@ -170,6 +210,9 @@ export default function App() {
   function playStory(id: number) {
     setStoryId(id)
     setPaused(false)
+    // startNarration resets the audio module's channel flags; mirror it here
+    setVoicePaused(false)
+    setMusicPaused(false)
     const story = STORIES.find((candidate) => candidate.id === id) ?? STORIES[0]
     const index = STORIES.findIndex((candidate) => candidate.id === story.id)
     const next = STORIES[(index + 1) % STORIES.length]
@@ -189,9 +232,32 @@ export default function App() {
     if (paused) {
       resumeStoryAudio()
       setPaused(false)
+      // resumeStoryAudio brings everything back, so the channel toggles reset
+      setVoicePaused(false)
+      setMusicPaused(false)
     } else {
       pauseStoryAudio()
       setPaused(true)
+    }
+  }
+
+  function toggleVoice() {
+    if (voicePaused) {
+      resumeVoice()
+      setVoicePaused(false)
+    } else {
+      pauseVoice()
+      setVoicePaused(true)
+    }
+  }
+
+  function toggleMusic() {
+    if (musicPaused) {
+      resumeMusic()
+      setMusicPaused(false)
+    } else {
+      pauseMusic()
+      setMusicPaused(true)
     }
   }
 
@@ -201,10 +267,11 @@ export default function App() {
     }
     startLullaby()
     playWhoosh()
-    setTimeout(() => playIntro(), 1000)
+    playSparkles()
     setButtonFading(true)
     await wait(700)
     setPhase('intro')
+    playWriting()
     await wait(20)
     setLine1Active(true)
     // Line 1 finishes typing, then an 800ms breath before line 2 starts
@@ -268,9 +335,25 @@ export default function App() {
               </button>
             ))}
           </div>
-          <button className="pause-button" onClick={toggleStoryAudio} aria-label={paused ? 'Continuă' : 'Pauză'}>
-            {paused ? <PlayIcon /> : <PauseIcon />}
-          </button>
+          <div className="audio-controls">
+            <button
+              className="channel-button"
+              onClick={toggleVoice}
+              aria-label={voicePaused ? 'Pornește vocea' : 'Oprește vocea'}
+            >
+              <VoiceIcon slashed={voicePaused} />
+            </button>
+            <button className="pause-button" onClick={toggleStoryAudio} aria-label={paused ? 'Continuă' : 'Pauză'}>
+              {paused ? <PlayIcon /> : <PauseIcon />}
+            </button>
+            <button
+              className="channel-button"
+              onClick={toggleMusic}
+              aria-label={musicPaused ? 'Pornește muzica' : 'Oprește muzica'}
+            >
+              <MusicIcon slashed={musicPaused} />
+            </button>
+          </div>
         </div>
       )}
     </>

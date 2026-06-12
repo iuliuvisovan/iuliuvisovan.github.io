@@ -95,12 +95,17 @@ body::before {
 
 .tell-button img {
   display: block;
-  width: min(360px, 68vw);
+  width: min(450px, 85vw);
   height: auto;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.18));
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.45)) drop-shadow(0 0 40px rgba(255, 255, 255, 0.25));
+  transition: filter var(--anim--hover-time) var(--anim--hover-ease);
   pointer-events: none;
   user-select: none;
   -webkit-user-select: none;
+}
+
+.tell-button:hover img {
+  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 40px rgba(255, 255, 255, 0.5));
 }
 
 /* ========== INTRO LINES ========== */
@@ -236,14 +241,23 @@ body::before {
     opacity 0.8s ease;
 }
 
-/* Floating circular glass pause/play control over the story */
-.pause-button {
-  all: unset;
-  cursor: pointer;
+/* Bottom-centered row holding the voice toggle, the main pause/play control
+   and the music toggle */
+.audio-controls {
   position: absolute;
   bottom: 24px;
   left: 50%;
   translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 3;
+}
+
+/* Floating circular glass pause/play control over the story */
+.pause-button {
+  all: unset;
+  cursor: pointer;
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -259,6 +273,30 @@ body::before {
 }
 
 .pause-button:hover {
+  background: rgba(255, 251, 245, 0.55);
+  scale: 1.07;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+}
+
+/* Smaller glass toggles flanking the pause control: voice (narration) on the
+   left, music (lullaby) on the right */
+.channel-button {
+  all: unset;
+  cursor: pointer;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 251, 245, 0.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
+  transition: background var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease), scale var(--anim--hover-time) var(--anim--hover-ease);
+}
+
+.channel-button:hover {
   background: rgba(255, 251, 245, 0.55);
   scale: 1.07;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
@@ -329,8 +367,8 @@ body::before {
     top: -16px;
   }
 
-  /* Pause control needs extra clearance below it on a phone */
-  .pause-button {
+  /* Audio controls need extra clearance below them on a phone */
+  .audio-controls {
     bottom: 0px;
   }
 }
