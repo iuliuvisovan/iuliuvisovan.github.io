@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import GlassButton from './components/GlassButton'
+import tellMe from './assets/tellme.png'
 import { startLullaby } from './lullaby'
 import { playWhoosh } from './whoosh'
 import { playIntro } from './intro'
 import { startNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
 import { STORIES } from './stories'
-import tellMe from './assets/tellme.png'
 
 // front -> the image button
 // back  -> flipped, "A fost odată..." label
@@ -87,15 +87,69 @@ export default function App() {
   // the highlight. Null before playback and after stopNarration.
   const [activeChunk, setActiveChunk] = useState<number | null>(null)
   const storyContentRef = useRef<HTMLSpanElement>(null)
+  // The glass highlight is a JS-positioned overlay living in the <button>,
+  // outside the masked scrolling span — the span's mask-image creates a
+  // backdrop root, so a backdrop-filter inside it could never blur the page.
+  const glassPillRef = useRef<HTMLDivElement>(null)
 
   const selectedStory = STORIES.find((story) => story.id === storyId) ?? STORIES[0]
 
+  // Moves the pill onto the active paragraph. Both the <p> (via the positioned
+  // <button>, its offsetParent) and the pill share the button's coordinate
+  // space, which does not change with scroll — so offset* values map directly
+  // onto the pill's top/left, and CSS transitions animate the morph.
+  function placeGlassPill() {
+    const pill = glassPillRef.current
+    const container = storyContentRef.current
+    if (!pill || !container) {
+      return
+    }
+    const paragraph = container.querySelector('.story-paragraph--active') as HTMLElement | null
+    if (!paragraph) {
+      pill.style.opacity = '0'
+      return
+    }
+    pill.style.top = `${paragraph.offsetTop}px`
+    pill.style.left = `${paragraph.offsetLeft}px`
+    pill.style.width = `${paragraph.offsetWidth}px`
+    pill.style.height = `${paragraph.offsetHeight}px`
+    pill.style.opacity = '1'
+    // The pill doesn't live in the scroller, so it counters scroll manually
+    pill.style.transform = `translateY(${-container.scrollTop}px)`
+  }
+
+  // The text scrolls but the pill does not: track scrollTop with a transform.
+  // transform is deliberately excluded from the pill's CSS transition list so
+  // this tracking is instant, while top/left/width/height morphs stay animated.
+  useEffect(() => {
+    const container = storyContentRef.current
+    if (!container) {
+      return
+    }
+    function followScroll() {
+      const pill = glassPillRef.current
+      if (pill && container) {
+        pill.style.transform = `translateY(${-container.scrollTop}px)`
+      }
+    }
+    window.addEventListener('resize', placeGlassPill)
+    container.addEventListener('scroll', followScroll, { passive: true })
+    return () => {
+      window.removeEventListener('resize', placeGlassPill)
+      container.removeEventListener('scroll', followScroll)
+    }
+  }, [])
+
   // Keep the narrated paragraphs in view: when the active chunk changes,
-  // scroll the story container so the chunk's first paragraph sits 200px below
+  // scroll the story container so the chunk's first paragraph sits 120px below
   // the top. offsetTop is relative to the positioned <button>, not the scrolling
   // span, so the target comes from rect difference plus current scrollTop.
   useEffect(() => {
     if (activeChunk === null) {
+      const pill = glassPillRef.current
+      if (pill) {
+        pill.style.opacity = '0'
+      }
       return
     }
     const container = storyContentRef.current
@@ -103,8 +157,9 @@ export default function App() {
     if (!container || !paragraph) {
       return
     }
-    const top = paragraph.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 200
+    const top = paragraph.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 120
     container.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' })
+    placeGlassPill()
   }, [activeChunk])
 
   function playStory(id: number) {
@@ -170,7 +225,12 @@ export default function App() {
           </GlassButton>
         </div>
         <div className="flip-face flip-face--back">
-          <GlassButton fill onClick={flipCard} contentRef={storyContentRef}>
+          <GlassButton
+            fill
+            onClick={flipCard}
+            contentRef={storyContentRef}
+            overlay={<div className="story-glass-pill" ref={glassPillRef} />}
+          >
             <i className="loading-text">
               <TypedLine text={LINE_1} active={line1Active} />
               <br />

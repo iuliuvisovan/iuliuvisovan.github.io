@@ -16,7 +16,6 @@
   --anim--hover-time: 400ms;
   --anim--hover-ease: cubic-bezier(0.25, 1, 0.5, 1);
   --radius: 150px;
-  --corner: squircle;
 }
 
 /* React mounts into #root; display:contents lets body's flex centering act
@@ -29,6 +28,8 @@
 body {
   width: 100%;
   height: 100vh;
+  /* Dynamic viewport so the card centers under mobile URL bars */
+  height: 100dvh;
   margin: 0;
   padding: 0;
   display: flex;
@@ -95,7 +96,6 @@ body::before {
   position: relative;
   z-index: 2;
   border-radius: var(--radius);
-  corner-shape: var(--corner);
   background: transparent;
   pointer-events: none;
   transition: all var(--anim--hover-time) var(--anim--hover-ease);
@@ -122,7 +122,6 @@ body::before {
   z-index: 0;
   inset: 0;
   border-radius: var(--radius);
-  corner-shape: var(--corner);
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
   width: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
   height: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
@@ -154,7 +153,6 @@ button {
     rgba(255, 255, 255, 0.05)
   );
   border-radius: var(--radius);
-  corner-shape: var(--corner);
   box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
     inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
     0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
@@ -202,7 +200,7 @@ button > span {
 /* Image label on the button face */
 .button-image {
   display: block;
-  height: 3.62em;
+  height: 3.1em;
   width: auto;
   /* Nudge down-right 10px to visually center the slightly off-center artwork */
   transform: translate(10px, 10px);
@@ -240,7 +238,6 @@ button > span::after {
   left: calc(0% + var(--border-width) / 2);
   box-sizing: border-box;
   border-radius: var(--radius);
-  corner-shape: var(--corner);
   overflow: clip;
   background: linear-gradient(
     var(--angle-2),
@@ -279,7 +276,6 @@ button::after {
   z-index: 1;
   inset: 0;
   border-radius: var(--radius);
-  corner-shape: var(--corner);
   width: calc(100% + var(--border-width));
   height: calc(100% + var(--border-width));
   top: calc(0% - var(--border-width) / 2);
@@ -399,6 +395,9 @@ button::after {
 
 .flip-face--front {
   position: relative;
+  /* Front card is a full oval bubble; the glass layers all read --radius,
+     and the back face keeps the 150px value from :root. */
+  --radius: 50%;
 }
 
 .flip-face--back {
@@ -424,12 +423,13 @@ button::after {
   pointer-events: none;
 }
 
-/* Fixed card size, chosen deliberately: the front button defines the .flip
-   card's size, and the back face fills it, so both faces render at 486x325. */
+/* Card size, chosen deliberately: the front button defines the .flip card's
+   size, and the back face fills it. A perfect circle: 400px diameter on
+   desktop, shrinking with the viewport on mobile (width and height stay equal). */
 .flip-face--front button {
   display: flex;
-  width: 486px;
-  height: 325px;
+  width: min(400px, calc(100vw - 32px));
+  height: min(400px, calc(100vw - 32px));
   box-sizing: border-box;
   /* Later list items win for width/height; everything else keeps the hover timing. */
   transition: all var(--anim--hover-time) var(--anim--hover-ease), width 900ms var(--anim--hover-ease), height 900ms var(--anim--hover-ease);
@@ -440,10 +440,12 @@ button::after {
 .flip[data-expanded="true"] .flip-face--front button {
   width: min(768px, calc(100vw - 32px));
   height: 90vh;
+  /* Dynamic viewport so the card centers under mobile URL bars */
+  height: 90dvh;
 }
 
 /* The structural span fills the fixed button; its em padding stays inside
-   (border-box) and the image is centered and clamped so nothing overflows. */
+   (border-box) and the triangle is centered so nothing overflows. */
 .flip-face--front button > span {
   display: flex;
   align-items: center;
@@ -522,12 +524,16 @@ button::after {
   /* White glow via drop-shadow because text-shadow can't work on clipped-gradient
      text; this intentionally replaces the button's dark text shadow on this label. */
   filter: drop-shadow(0 0 0.12em rgba(255, 255, 255, 0.9)) drop-shadow(0 0 0.35em rgba(255, 255, 255, 0.6)) drop-shadow(0 0 0.7em rgba(255, 255, 255, 0.35));
-  transition: margin-top 900ms var(--anim--hover-ease);
+  transition: margin-top 900ms var(--anim--hover-ease), opacity 700ms ease;
 }
 
-/* Expanded: pushes the label down to clear the floating story picker */
+/* Expanded: fades the label out so it never overlaps the story text; the
+   margin keeps its (now invisible) box as a spacer below the floating story
+   picker so the story content starts clear of it. */
 .flip[data-expanded="true"] .loading-text {
   margin-top: 64px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Second label line is typed letter by letter from React state after the flip.
@@ -548,7 +554,7 @@ button::after {
 .story-text {
   opacity: 0;
   transition: opacity 800ms ease;
-  font-size: 24px;
+  font-size: 26px;
   line-height: 1.5;
   font-family: "Baloo 2", sans-serif;
   color: #6b4525;
@@ -565,23 +571,55 @@ button::after {
 }
 
 /* One story paragraph; padding + margin reproduce the blank-line gap the old
-   joined string had. The slow background fade is the narration highlight
-   moving from one chunk's paragraphs to the next. */
+   joined string had. Layout-only: the narration highlight is the
+   .story-glass-pill overlay, positioned over the active paragraph from JS.
+   The transparent border stays so the active state never shifts layout. */
 .story-paragraph {
   margin: 0 0 16px;
-  padding: 12px;
+  padding: 16px;
   border-radius: 42px;
-  corner-shape: squircle;
   border: 1px solid transparent;
-  background-color: transparent;
-  transition: background-color 0.8s ease, border-color 0.8s ease, box-shadow 0.8s ease;
 }
 
-/* The two paragraphs of the chunk currently being narrated */
-.story-paragraph--active {
-  background-color: rgba(255, 255, 255, 0.24);
+/* .story-paragraph--active is a marker class only: JS finds the active
+   paragraph through it and the pill provides the visuals. Glass on the
+   paragraph itself can't work — it lives inside the masked scrolling span,
+   and a mask-image creates a backdrop root, so a descendant backdrop-filter
+   can never sample the page background. */
+
+/* The narration highlight: a JS-positioned overlay inside the <button>,
+   before the content span, sharing the paragraphs' offsetParent coordinate
+   space (scroll is countered via transform from JS). Big-button glass
+   material with a whiter gradient (0.2/0.4/0.2 vs the button's 0.05/0.2/0.05),
+   4px backdrop blur (the button's clamp resolves to 4px at its font size),
+   inset shadow stack minus the bottom specular highlight (outer drop shadow
+   skipped too), whitish border, and the same 150px squircle — the browser
+   clamps the radius to the
+   pill height, giving the full bubble shape. transform is deliberately NOT
+   transitioned: it tracks scrollTop and must be instant, while the
+   top/left/width/height morph between paragraphs animates. */
+.story-glass-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+  border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  background: linear-gradient(
+    -75deg,
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.2)
+  );
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2);
+  transition: top 0.8s var(--anim--hover-ease), left 0.8s var(--anim--hover-ease),
+    width 0.8s var(--anim--hover-ease), height 0.8s var(--anim--hover-ease),
+    opacity 0.8s ease;
 }
 
 /* Keep the story out of layout entirely at the fixed 486x325 size; it enters
@@ -658,7 +696,7 @@ button::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 251, 245, 0.35);
+  background: rgba(255, 251, 245, 0.18);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
@@ -672,7 +710,7 @@ button::after {
 }
 
 .story-picker-button:hover {
-  background: rgba(255, 251, 245, 0.55);
+  background: rgba(255, 251, 245, 0.4);
   scale: 1.07;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
 }
@@ -683,11 +721,90 @@ button::after {
   content: none;
 }
 
-/* Selected story: brighter glass plus a soft outer ring; the :hover pairing
-   keeps the ring from being overridden while hovering the active button. */
+/* Selected story: near-solid white fill, no ring; the faint siblings make it
+   read as selected at a glance. The :hover pairing keeps the fill from being
+   overridden while hovering the active button. */
 .story-picker-button--active,
 .story-picker-button--active:hover {
-  background: rgba(255, 251, 245, 0.7);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12), 0 0 0 2px rgba(150, 78, 17, 0.35);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ========== EXPANDED STORY: BIG GLASS DISSOLVE ========== */
+/* While the card expands (900ms width/height on the front button), the big
+   glass bubble fades away on every screen size, leaving the .story-glass-pill
+   highlight as the only glass during a story. Background and box-shadow
+   animate to nothing instead of snapping: same gradient/shadow shapes with
+   zero-alpha colors. Scoped to .button-wrap so the story picker and pause
+   buttons, siblings on the back face, keep their own glass. */
+.flip[data-expanded="true"] .flip-face--back .button-wrap button {
+  background: linear-gradient(
+    -75deg,
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0),
+    rgba(255, 255, 255, 0)
+  );
+  box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0),
+    0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0),
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0),
+    0 0 0 0 rgba(255, 255, 255, 0);
+  /* Must be none, not blur(0): any non-none backdrop-filter creates a
+     backdrop root, which would block the .story-glass-pill inside this button
+     from sampling the page background. The snap from 4px to none at expand
+     start is invisible amid the 900ms dissolve. */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  /* Base button transition is 400ms; these layers ride the 900ms expand. */
+  transition: all var(--anim--hover-time) var(--anim--hover-ease),
+    background 900ms var(--anim--hover-ease),
+    box-shadow 900ms var(--anim--hover-ease);
+}
+
+/* Sheen layer */
+.flip[data-expanded="true"] .flip-face--back .button-wrap button > span::after {
+  opacity: 0;
+  transition: opacity 900ms var(--anim--hover-ease);
+}
+
+/* Outline ring */
+.flip[data-expanded="true"] .flip-face--back .button-wrap button::after {
+  opacity: 0;
+  transition: opacity 900ms var(--anim--hover-ease);
+}
+
+/* Drop shadow */
+.flip[data-expanded="true"] .flip-face--back .button-wrap .button-shadow {
+  opacity: 0;
+  transition: opacity 900ms var(--anim--hover-ease);
+}
+
+/* ========== MOBILE ========== */
+
+@media (max-width: 520px) {
+  .flip-face--front .button-image {
+    width: 68%;
+    height: auto;
+    transform: translate(5px, 5px);
+  }
+
+  /* Bottom fade band shifted ~50px up so text dissolves above the controls;
+     top edge keeps the desktop 7% fade. Side padding halved from the base
+     button span (0.8em + 4px) so the story gets more line width on a phone. */
+  .flip[data-expanded="true"] .flip-face--back button > span {
+    padding-inline: calc(0.4em + 2px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 calc(7% + 8px), #000 calc(100% - 114px), transparent calc(100% - 44px));
+    mask-image: linear-gradient(to bottom, transparent 0, #000 calc(7% + 8px), #000 calc(100% - 114px), transparent calc(100% - 44px));
+  }
+
+  /* Numbers row sits 40px higher on a phone */
+  .story-picker {
+    top: -16px;
+  }
+
+  /* Pause control needs extra clearance below it on a phone */
+  .pause-button {
+    bottom: 99px;
+  }
 }
 
