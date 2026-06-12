@@ -9,4 +9,4 @@ export const STORY_API_URL =
 export const SOUNDS_ENABLED = true
 
 // TEMPORARY debug knob: speeds up all audio playback. Set back to 1 for normal speed.
-export const PLAYBACK_RATE = 2
+export const PLAYBACK_RATE = 1

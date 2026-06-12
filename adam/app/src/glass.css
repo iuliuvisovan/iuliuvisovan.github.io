@@ -504,8 +504,8 @@ button::after {
   overflow-y: auto;
   pointer-events: auto;
   scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 7%, #000 90%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 7%, #000 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 56px, #000 136px, #000 90%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 56px, #000 136px, #000 90%, transparent 100%);
 }
 
 .flip[data-expanded="true"] .flip-face--back button > span::-webkit-scrollbar {
@@ -696,7 +696,7 @@ button::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 251, 245, 0.18);
+  background: rgba(255, 251, 245, 0.35);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
@@ -710,7 +710,7 @@ button::after {
 }
 
 .story-picker-button:hover {
-  background: rgba(255, 251, 245, 0.4);
+  background: rgba(255, 251, 245, 0.55);
   scale: 1.07;
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
 }
@@ -793,8 +793,8 @@ button::after {
      button span (0.8em + 4px) so the story gets more line width on a phone. */
   .flip[data-expanded="true"] .flip-face--back button > span {
     padding-inline: calc(0.4em + 2px);
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 calc(7% + 8px), #000 calc(100% - 114px), transparent calc(100% - 44px));
-    mask-image: linear-gradient(to bottom, transparent 0, #000 calc(7% + 8px), #000 calc(100% - 114px), transparent calc(100% - 44px));
+    -webkit-mask-image: linear-gradient(to bottom, transparent 56px, #000 136px, #000 calc(100% - 114px), transparent calc(100% - 44px));
+    mask-image: linear-gradient(to bottom, transparent 56px, #000 136px, #000 calc(100% - 114px), transparent calc(100% - 44px));
   }
 
   /* Numbers row sits 40px higher on a phone */
@@ -804,7 +804,7 @@ button::after {
 
   /* Pause control needs extra clearance below it on a phone */
   .pause-button {
-    bottom: 99px;
+    bottom: 0px;
   }
 }
 

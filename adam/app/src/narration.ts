@@ -32,8 +32,8 @@ let session = 0
 // How quiet the lullaby gets while the narration is speaking
 const DUCKED_VOLUME = 0.12
 
-// Lullaby-only breathing room between two narration chunks (debug: normally 4000)
-const GAP_MS = 0
+// Lullaby-only breathing room between two narration chunks
+const GAP_MS = 4000
 
 const RAMP_STEP_MS = 50
 
