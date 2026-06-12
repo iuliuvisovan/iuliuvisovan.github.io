@@ -31,7 +31,7 @@ const NARRATION_VOICE_SETTINGS = {
 }
 const NARRATION_MAX_CHARS = 4000
 // Bump this tag whenever voice/settings change so stale cached audio is not served.
-const NARRATION_CACHE_TAG = 'iuliu-seiren-mv2-v2'
+const NARRATION_CACHE_TAG = 'iuliu-seiren-mv2-v3'
 
 function corsHeaders(origin: string | null): Record<string, string> {
   const allow =

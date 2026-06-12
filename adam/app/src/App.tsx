@@ -3,7 +3,7 @@ import GlassButton from './components/GlassButton'
 import { startLullaby } from './lullaby'
 import { playWhoosh } from './whoosh'
 import { playIntro } from './intro'
-import { prefetchNarration, startNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
+import { startNarration, pauseStoryAudio, resumeStoryAudio } from './narration'
 import { STORIES, type Story } from './stories'
 import tellMe from './assets/tellme.png'
 
@@ -102,8 +102,6 @@ export default function App() {
     const story = STORIES.find((candidate) => candidate.id === id) ?? STORIES[0]
     const index = STORIES.findIndex((candidate) => candidate.id === story.id)
     const next = STORIES[(index + 1) % STORIES.length]
-    // Prefetch the next story right away so the auto-advance gap is seamless
-    prefetchNarration(next.id, narrationChunks(next))
     startNarration(id, narrationChunks(story), () => playStory(next.id))
     storyContentRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -132,7 +130,6 @@ export default function App() {
     startLullaby()
     playWhoosh()
     playIntro()
-    prefetchNarration(selectedStory.id, narrationChunks(selectedStory))
     setPhase('back')
     // The CSS flip animation runs 700ms; the faces swap at the 90° edge-on
     // midpoint (350ms), driven from React so no filled CSS animation lingers.
@@ -178,9 +175,6 @@ export default function App() {
                   key={story.id}
                   className={story.id === storyId ? 'story-picker-button story-picker-button--active' : 'story-picker-button'}
                   onClick={() => selectStory(story.id)}
-                  // Prefetch on hover so the ElevenLabs round trip is already
-                  // underway by the time the user clicks.
-                  onPointerEnter={() => prefetchNarration(story.id, narrationChunks(story))}
                   aria-label={`Povestea ${story.id}`}
                 >
                   {story.id}
