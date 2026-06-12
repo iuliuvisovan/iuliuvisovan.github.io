@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import tellMe from './assets/tellme.png'
 import { startLullaby } from './lullaby'
-import { playWhoosh } from './whoosh'
 import { playSparkles } from './sparkles'
 import { playWriting } from './writing'
 import { startNarration, pauseStoryAudio, resumeStoryAudio, pauseVoice, resumeVoice, pauseMusic, resumeMusic } from './narration'
@@ -292,13 +291,14 @@ export default function App() {
     if (phase !== 'button' || buttonFading) {
       return
     }
-    startLullaby()
-    playWhoosh()
     playSparkles()
     setButtonFading(true)
     await wait(700)
-    setPhase('intro')
+    await wait(500)
     playWriting()
+    await wait(500)
+    startLullaby()
+    setPhase('intro')
     await wait(20)
     setLine1Active(true)
     // Line 1 finishes typing, then an 800ms breath before line 2 starts

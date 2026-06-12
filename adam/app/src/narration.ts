@@ -1,5 +1,6 @@
 import { PLAYBACK_RATE, SOUNDS_ENABLED } from './config'
 import { getLullabyAudio, TARGET_VOLUME } from './lullaby'
+import { rampLevel, setLevel } from './audio-graph'
 
 // Narration ships as static mp3 files bundled with the site, one file per
 // story paragraph, so six chunks per story. No network calls at runtime.
@@ -47,7 +48,11 @@ let chunkListener: ((chunk: number | null) => void) | null = null
 let session = 0
 
 // How quiet the lullaby gets while the narration is speaking
-const DUCKED_VOLUME = 0.09
+const DUCKED_VOLUME = 0.05
+
+// How loud the narration voice plays; gains live on a GainNode, so the level
+// can sit above 1.0 to lift the voice over the lullaby
+const VOICE_VOLUME = 1.4
 
 // Per-channel pause flags for the small voice/music toggles. The main
 // pause/resume pair below ignores them on pause (it silences everything) and
@@ -60,34 +65,14 @@ let musicPaused = false
 // Lullaby-only breathing room between two narration chunks
 const GAP_MS = 4000
 
-const RAMP_STEP_MS = 50
-
-// One active ramp per element; starting a new ramp cancels the previous one,
-// so a resume mid-fade simply turns the volume back around.
-const rampTimers = new Map<HTMLAudioElement, number>()
-
-// Animates `element.volume` toward `target` over `durationMs` in ~50ms steps,
-// then calls `done` (if given) once the target is reached.
+// Fades an element toward `target` over `durationMs`, then calls `done` (if
+// given). Kept under its old name, but the work now happens on the element's
+// GainNode in audio-graph.ts: iOS WebKit treats element.volume as read-only,
+// so a gain ramp is the only fade that is actually audible there. One active
+// ramp per element; starting a new ramp cancels the previous one, so a resume
+// mid-fade simply turns the level back around.
 export function rampVolume(element: HTMLAudioElement, target: number, durationMs: number, done?: () => void) {
-  const previous = rampTimers.get(element)
-  if (previous !== undefined) {
-    clearInterval(previous)
-  }
-  const start = element.volume
-  const steps = Math.max(Math.round(durationMs / RAMP_STEP_MS), 1)
-  let step = 0
-  const timer = setInterval(() => {
-    step += 1
-    element.volume = Math.min(Math.max(start + ((target - start) * step) / steps, 0), 1)
-    if (step >= steps) {
-      clearInterval(timer)
-      rampTimers.delete(element)
-      if (done) {
-        done()
-      }
-    }
-  }, RAMP_STEP_MS)
-  rampTimers.set(element, timer)
+  rampLevel(element, target, durationMs, done)
 }
 
 // Fades the whole story soundscape to silence over 1500ms, then pauses it:
@@ -151,7 +136,7 @@ export function resumeStoryAudio() {
   const narrationActive = currentAudio !== null && !currentAudio.ended
   if (currentAudio && narrationActive) {
     currentAudio.play().catch(() => {})
-    rampVolume(currentAudio, 1, 1000)
+    rampVolume(currentAudio, VOICE_VOLUME, 1000)
   }
   const lullaby = getLullabyAudio()
   if (lullaby) {
@@ -213,7 +198,7 @@ export function resumeVoice() {
   }
   if (currentAudio && !currentAudio.ended) {
     currentAudio.play().catch(() => {})
-    rampVolume(currentAudio, 1, 800)
+    rampVolume(currentAudio, VOICE_VOLUME, 800)
     const lullaby = getLullabyAudio()
     if (lullaby && !musicPaused) {
       rampVolume(lullaby, DUCKED_VOLUME, 800)
@@ -409,7 +394,7 @@ function playChunk(index: number) {
   }
   // Loading a new resource resets playbackRate to the default, so reassert it
   narration.playbackRate = PLAYBACK_RATE
-  narration.volume = 1
+  setLevel(narration, VOICE_VOLUME)
   currentAudio = narration
   const lullaby = getLullabyAudio()
   if (lullaby && !musicPaused) {

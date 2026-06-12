@@ -91,12 +91,21 @@ body::before {
 .tell-button {
   all: unset;
   cursor: pointer;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   transition: scale var(--anim--hover-time) var(--anim--hover-ease), opacity 700ms ease;
 }
 
-.tell-button:hover {
-  scale: 1.04;
+@media (hover: hover) {
+  .tell-button:hover {
+    scale: 1.04;
+  }
+}
+
+/* Press feedback stays outside the hover media query so it works on touch,
+   and is declared after :hover so it wins where both apply */
+.tell-button:active {
+  scale: 0.96;
 }
 
 .tell-button--fading {
@@ -115,8 +124,10 @@ body::before {
   -webkit-user-select: none;
 }
 
-.tell-button:hover img {
-  filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 40px rgba(255, 255, 255, 0.5));
+@media (hover: hover) {
+  .tell-button:hover img {
+    filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 40px rgba(255, 255, 255, 0.5));
+  }
 }
 
 /* ========== INTRO LINES ========== */
@@ -229,18 +240,19 @@ body::before {
   opacity: 0;
   pointer-events: none;
   box-sizing: border-box;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
   background: linear-gradient(
     -75deg,
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.5),
-    rgba(255, 255, 255, 0.3)
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.6),
+    rgba(255, 255, 255, 0.4)
   );
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   box-shadow: inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2);
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.1);
   transition: top 0.8s var(--anim--hover-ease), left 0.8s var(--anim--hover-ease),
     width 0.8s var(--anim--hover-ease), height 0.8s var(--anim--hover-ease),
     opacity 0.8s ease;
@@ -286,10 +298,12 @@ body::before {
   transition: background var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease), scale var(--anim--hover-time) var(--anim--hover-ease);
 }
 
-.pause-button:hover {
-  background: rgba(255, 251, 245, 0.55);
-  scale: 1.07;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+@media (hover: hover) {
+  .pause-button:hover {
+    background: rgba(255, 251, 245, 0.55);
+    scale: 1.07;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+  }
 }
 
 /* Smaller glass toggles flanking the pause control: voice (narration) on the
@@ -310,10 +324,12 @@ body::before {
   transition: background var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease), scale var(--anim--hover-time) var(--anim--hover-ease);
 }
 
-.channel-button:hover {
-  background: rgba(255, 251, 245, 0.55);
-  scale: 1.07;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+@media (hover: hover) {
+  .channel-button:hover {
+    background: rgba(255, 251, 245, 0.55);
+    scale: 1.07;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+  }
 }
 
 /* Floating row of numbered story-picker controls at the top of the story */
@@ -349,17 +365,24 @@ body::before {
   transition: background var(--anim--hover-time) var(--anim--hover-ease), box-shadow var(--anim--hover-time) var(--anim--hover-ease), scale var(--anim--hover-time) var(--anim--hover-ease);
 }
 
-.story-picker-button:hover {
-  background: rgba(255, 251, 245, 0.55);
-  scale: 1.07;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+@media (hover: hover) {
+  .story-picker-button:hover {
+    background: rgba(255, 251, 245, 0.55);
+    scale: 1.07;
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 6px 22px rgba(0, 0, 0, 0.16);
+  }
+
+  /* Keeps the active fill from being overridden while hovering the active
+     button (see the rule below for the base active style) */
+  .story-picker-button--active:hover {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
 }
 
 /* Selected story: near-solid white fill, no ring; the faint siblings make it
-   read as selected at a glance. The :hover pairing keeps the fill from being
-   overridden while hovering the active button. */
-.story-picker-button--active,
-.story-picker-button--active:hover {
+   read as selected at a glance */
+.story-picker-button--active {
   background: rgba(255, 255, 255, 0.9);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
 }
