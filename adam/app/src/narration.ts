@@ -1,4 +1,4 @@
-import { SOUNDS_ENABLED } from './config'
+import { PLAYBACK_RATE, SOUNDS_ENABLED } from './config'
 import { getLullabyAudio, TARGET_VOLUME } from './lullaby'
 
 // Narration ships as static mp3 files bundled with the site, one file per
@@ -32,8 +32,8 @@ let session = 0
 // How quiet the lullaby gets while the narration is speaking
 const DUCKED_VOLUME = 0.12
 
-// Lullaby-only breathing room between two narration chunks
-const GAP_MS = 4000
+// Lullaby-only breathing room between two narration chunks (debug: normally 4000)
+const GAP_MS = 0
 
 const RAMP_STEP_MS = 50
 
@@ -188,6 +188,7 @@ function playChunk(index: number) {
   chunkListener?.(index)
   const url = activeChunkUrls[index]
   const narration = new Audio(url)
+  narration.playbackRate = PLAYBACK_RATE
   narration.volume = 1
   currentAudio = narration
   const lullaby = getLullabyAudio()

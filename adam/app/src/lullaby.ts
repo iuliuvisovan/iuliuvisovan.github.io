@@ -1,4 +1,4 @@
-import { SOUNDS_ENABLED } from './config'
+import { PLAYBACK_RATE, SOUNDS_ENABLED } from './config'
 import lullabyUrl from './assets/lullaby.mp3'
 
 let audio: HTMLAudioElement | null = null
@@ -17,6 +17,7 @@ export function startLullaby() {
     return
   }
   audio = new Audio(lullabyUrl)
+  audio.playbackRate = PLAYBACK_RATE
   audio.loop = true
   audio.volume = 0
 
