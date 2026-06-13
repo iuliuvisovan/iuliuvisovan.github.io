@@ -327,7 +327,7 @@ export default function App() {
     setStoryShown(true)
     // Let the stage finish fading in and settle for a beat before the
     // narration audio starts (visuals/animations above are unaffected).
-    await wait(2000)
+    await wait(1000)
     playStory(selectedStory.id)
   }
 
