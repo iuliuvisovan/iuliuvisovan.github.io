@@ -349,6 +349,27 @@ export function startNarration(storyId: number, texts: string[], storyEnded?: ()
   playChunk(0)
 }
 
+// Blesses the persistent voice element inside a user gesture so a narration
+// that starts seconds later (past iOS's short gesture window) can still play.
+// Called from the button tap: a muted play()/pause() in the same synchronous
+// tick is enough to unlock the element for the rest of the session. Without
+// this, startNarration creating the element ~12s after the tap gets silently
+// blocked by iOS autoplay, and the story never speaks.
+export function primeVoice(storyId: number) {
+  if (!SOUNDS_ENABLED) {
+    return
+  }
+  const element = getVoiceAudio()
+  element.src = chunkUrl(storyId, 0)
+  element.muted = true
+  element.play().catch(() => {})
+  element.pause()
+  element.muted = false
+  element.currentTime = 0
+  // startNarration reloads from scratch, so don't leave this src cached
+  loadedUrl = null
+}
+
 // Stops the current narration outright: in-flight fetches, the gap timer and
 // the chunk that's speaking all become stale. Bumping `session` is what makes
 // any awaited work bail instead of resuming on top of the next story.

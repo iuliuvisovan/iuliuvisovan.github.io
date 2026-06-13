@@ -57,8 +57,8 @@ body {
   overflow: hidden;
 }
 
-/* Rocking background: oversized fixed layer pivoting around a point far
-   below the screen, tilting gently like a rocking chair on a wide arc. */
+/* Depth background: oversized fixed layer pivoting around its own center,
+   scaling gently in place via translateZ under perspective. */
 body::before {
   content: "";
   position: fixed;
@@ -76,30 +76,33 @@ body::before {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transform-origin: 50% 400%;
-  animation: rock-sway 7s ease-in-out infinite, rock-dip 3.5s ease-in-out infinite;
-  will-change: rotate, translate;
+  transform-origin: 50% 50%;
+  animation: swing-z 7s ease-in-out infinite, swing-y 3.5s ease-in-out infinite;
+  will-change: transform, translate;
 }
 
-/* Sway and dip run as separate animations on the standalone rotate/translate
-   properties: the dip cycles at twice the sway frequency (lowest at each swing
-   extreme, highest through center), and with only end-point keyframes per
-   track the easing never brakes mid-swing. */
-@keyframes rock-sway {
+/* The rocking is a depth animation on the transform property: swing-z drives
+   translateZ under a far, subtle perspective (no tilt), easing the layer away
+   from the viewer and back across the full cycle. With only end-point keyframes
+   the easing never brakes mid-cycle. A second swing-y animation adds a very
+   slight vertical up-and-down bob on the standalone translate property, running
+   at twice the frequency. The two live on separate properties (transform vs
+   translate), so they compose without conflicting. */
+@keyframes swing-z {
   0%, 100% {
-    rotate: -0.3deg;
+    transform: perspective(1400px) translateZ(10px);
   }
   50% {
-    rotate: 0.3deg;
+    transform: perspective(1400px) translateZ(-62px);
   }
 }
 
-@keyframes rock-dip {
+@keyframes swing-y {
   0%, 100% {
-    translate: 0 6px;
+    translate: 0 2.5px;
   }
   50% {
-    translate: 0 0;
+    translate: 0 -2.5px;
   }
 }
 
@@ -231,7 +234,7 @@ body::before {
   text-align: center;
   padding-top: 50px;
   /* clears the floating pause button so the last line can scroll above it */
-  padding-bottom: 120px;
+  padding-bottom: 60px;
 }
 
 /* One story paragraph. Layout-only: the narration highlight is the
@@ -376,7 +379,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 251, 245, 0.35);
+  background: rgba(255, 251, 245, 0.15);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7), inset 0 -1px 1px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.12);
@@ -418,7 +421,7 @@ body::before {
      top edge keeps the desktop fade. Overriding the stage property retunes
      the scroller and the glass pill together. */
   .story-stage {
-    --story-fade-mask: linear-gradient(to bottom, transparent 16px, #000 96px, #000 calc(100% - 98px), transparent calc(100% - 28px));
+    --story-fade-mask: linear-gradient(to bottom, transparent 12px, #000 92px, #000 calc(100% - 98px), transparent calc(100% - 28px));
   }
 
   /* Side padding halved so the story gets more line width on a phone */

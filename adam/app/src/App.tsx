@@ -3,7 +3,7 @@ import tellMe from './assets/tellme.png'
 import { startLullaby } from './lullaby'
 import { playSparkles } from './sparkles'
 import { playWriting } from './writing'
-import { startNarration, pauseStoryAudio, resumeStoryAudio, pauseVoice, resumeVoice, pauseMusic, resumeMusic } from './narration'
+import { startNarration, primeVoice, pauseStoryAudio, resumeStoryAudio, pauseVoice, resumeVoice, pauseMusic, resumeMusic } from './narration'
 import { STORIES } from './stories'
 
 // button -> the image button on the background
@@ -128,7 +128,7 @@ export default function App() {
   const [paused, setPaused] = useState(false)
   const [voicePaused, setVoicePaused] = useState(false)
   const [musicPaused, setMusicPaused] = useState(false)
-  const [storyId, setStoryId] = useState(1)
+  const [storyId, setStoryId] = useState(() => STORIES[Math.floor(Math.random() * STORIES.length)].id)
   // Index of the narration chunk currently speaking; its paragraph gets the
   // highlight. Null before playback and after stopNarration.
   const [activeChunk, setActiveChunk] = useState<number | null>(null)
@@ -299,6 +299,9 @@ export default function App() {
     if (phase !== 'button' || buttonFading) {
       return
     }
+    // Bless the voice element inside the tap gesture so the delayed narration
+    // (it starts seconds later) can still play on iOS.
+    primeVoice(selectedStory.id)
     playSparkles()
     setButtonFading(true)
     await wait(1400)
@@ -309,8 +312,9 @@ export default function App() {
     setPhase('intro')
     await wait(20)
     setLine1Active(true)
-    // Line 1 finishes typing, then a 300ms breath before line 2 starts
-    await wait(LINE_1.length * TYPE_INTERVAL_MS + 300)
+    // Line 1 finishes typing, then line 2 starts a touch before the line 1
+    // typing fully settles
+    await wait(LINE_1.length * TYPE_INTERVAL_MS - 200)
     setLine2Active(true)
     // Line 2 finishes typing, an 800ms breath, then the intro fades out
     await wait(LINE_2.length * TYPE_INTERVAL_MS + 800)
