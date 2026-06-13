@@ -63,14 +63,15 @@ body::before {
   content: "";
   position: fixed;
   /* inset percentages resolve against the layout viewport, which shrinks
-     while browser toolbars are expanded; the explicit 116vw x 116lvh box
-     below always spans the maximal (large) viewport plus the 8% rocking
-     margin, in every toolbar state. The inset shorthand stays as a fallback
-     for engines without lvh (left + width and top + height win over
-     right/bottom when all are set). */
-  inset: -8%;
-  width: 116vw;
-  height: 116lvh;
+     while browser toolbars are expanded; the explicit 124vw x 124lvh box
+     below always spans the maximal (large) viewport plus the 12% rocking
+     margin, in every toolbar state. The margin is generous enough that the
+     swing-z recede (scaling the layer down) never pulls an edge into view.
+     The inset shorthand stays as a fallback for engines without lvh (left +
+     width and top + height win over right/bottom when all are set). */
+  inset: -12%;
+  width: 124vw;
+  height: 124lvh;
   z-index: -1;
   background-image: url("./assets/bg.png");
   background-size: cover;
