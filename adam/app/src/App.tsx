@@ -138,6 +138,14 @@ export default function App() {
   // root, so a backdrop-filter inside it could never blur the page.
   const glassPillRef = useRef<HTMLDivElement>(null)
 
+  // Auto-collapse the mobile browser chrome on load: the document carries
+  // 400px of extra scroll headroom (see html min-height in app.css), 200px
+  // above and 200px below, so scrolling to 200 centers the page and lets it
+  // bleed edge-to-edge top and bottom without a manual swipe.
+  useEffect(() => {
+    window.scrollTo(0, 200)
+  }, [])
+
   const selectedStory = STORIES.find((story) => story.id === storyId) ?? STORIES[0]
 
   // The pill's fade mask reuses the stage's --story-fade-mask gradient, but
@@ -293,7 +301,7 @@ export default function App() {
     }
     playSparkles()
     setButtonFading(true)
-    await wait(700)
+    await wait(1400)
     await wait(500)
     playWriting()
     await wait(500)

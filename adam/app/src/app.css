@@ -20,14 +20,28 @@
    scrollbars or layout shift appear. */
 html {
   overflow: auto;
+  /* 400px of scroll headroom. body sits in flow with a 200px top margin, so
+     there's 200px of slack above it and 200px below; window.scrollTo(0, 200)
+     in App.tsx parks the viewport dead center on body. The leftover scroll
+     range is what lets iOS Safari's / Chrome's toolbars collapse so the artwork
+     bleeds edge-to-edge. Desktop: lvh = vh and there's no toolbar, harmless. */
+  min-height: calc(100lvh + 400px);
 }
 
 body {
+  /* In normal flow (a fixed full-viewport body swallows the scroll gesture, so
+     the toolbars never collapse). The html has 400px of scroll headroom; this
+     200px top margin pushes body down so 200px of slack sits above it and 200px
+     below. window.scrollTo(0, 200) in App.tsx then lands the viewport dead
+     center on body, keeping the layout centered exactly as before. */
+  margin-top: 200px;
   width: 100%;
   height: 100vh;
   /* Dynamic viewport so content centers under mobile URL bars */
   height: 100dvh;
-  margin: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -35,6 +49,7 @@ body {
   justify-content: center;
   gap: 2rem;
   font-size: var(--global--size);
+  /* Must propagate to the canvas (html stays background-less) or the z-index: -1 fixed background layer gets covered */
   background-color: #f4ecdd;
   font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -47,7 +62,15 @@ body {
 body::before {
   content: "";
   position: fixed;
+  /* inset percentages resolve against the layout viewport, which shrinks
+     while browser toolbars are expanded; the explicit 116vw x 116lvh box
+     below always spans the maximal (large) viewport plus the 8% rocking
+     margin, in every toolbar state. The inset shorthand stays as a fallback
+     for engines without lvh (left + width and top + height win over
+     right/bottom when all are set). */
   inset: -8%;
+  width: 116vw;
+  height: 116lvh;
   z-index: -1;
   background-image: url("./assets/bg.png");
   background-size: cover;
@@ -93,7 +116,7 @@ body::before {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  transition: scale var(--anim--hover-time) var(--anim--hover-ease), opacity 700ms ease;
+  transition: scale var(--anim--hover-time) var(--anim--hover-ease), opacity 1400ms ease;
 }
 
 @media (hover: hover) {
@@ -271,7 +294,9 @@ body::before {
    and the music toggle */
 .audio-controls {
   position: absolute;
-  bottom: 8px;
+  /* Lifted above the iOS home indicator when viewport-fit=cover applies;
+     env() resolves to 0 everywhere else */
+  bottom: calc(8px + env(safe-area-inset-bottom));
   left: 50%;
   translate: -50% 0;
   display: flex;
@@ -402,13 +427,16 @@ body::before {
     padding-inline: 12px;
   }
 
-  /* Numbers row sits 40px higher on a phone */
+  /* Numbers row sits 40px higher on a phone; pushed back down by the notch
+     inset when the page bleeds under the status bar (env() is 0 otherwise).
+     At -16px the row's top edge is only ~5dvh - 16px from the viewport top,
+     which lands inside the ~47-59px notch zone on full-bleed iPhones. */
   .story-picker {
-    top: -16px;
+    top: calc(-16px + env(safe-area-inset-top));
   }
 
   /* Audio controls need extra clearance below them on a phone */
   .audio-controls {
-    bottom: -16px;
+    bottom: calc(-16px + env(safe-area-inset-bottom));
   }
 }
