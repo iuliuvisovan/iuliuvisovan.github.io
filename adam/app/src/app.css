@@ -229,8 +229,7 @@ body::before {
   text-shadow: 0 0 6px rgba(255, 255, 255, 1), 0 0 6px rgba(255, 255, 255, 0.2),
     0 0 18px rgba(255, 255, 255, 0.75);
   text-align: center;
-  /* clears the floating story picker above and the top mask band */
-  padding-top: 140px;
+  padding-top: 50px;
   /* clears the floating pause button so the last line can scroll above it */
   padding-bottom: 120px;
 }
@@ -419,7 +418,7 @@ body::before {
      top edge keeps the desktop fade. Overriding the stage property retunes
      the scroller and the glass pill together. */
   .story-stage {
-    --story-fade-mask: linear-gradient(to bottom, transparent 56px, #000 136px, #000 calc(100% - 114px), transparent calc(100% - 44px));
+    --story-fade-mask: linear-gradient(to bottom, transparent 16px, #000 96px, #000 calc(100% - 98px), transparent calc(100% - 28px));
   }
 
   /* Side padding halved so the story gets more line width on a phone */
@@ -432,11 +431,11 @@ body::before {
      At -16px the row's top edge is only ~5dvh - 16px from the viewport top,
      which lands inside the ~47-59px notch zone on full-bleed iPhones. */
   .story-picker {
-    top: calc(-16px + env(safe-area-inset-top));
+    top: calc(-24px + env(safe-area-inset-top));
   }
 
   /* Audio controls need extra clearance below them on a phone */
   .audio-controls {
-    bottom: calc(-16px + env(safe-area-inset-bottom));
+    bottom: calc(-24px + env(safe-area-inset-bottom));
   }
 }

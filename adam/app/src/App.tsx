@@ -309,8 +309,8 @@ export default function App() {
     setPhase('intro')
     await wait(20)
     setLine1Active(true)
-    // Line 1 finishes typing, then an 800ms breath before line 2 starts
-    await wait(LINE_1.length * TYPE_INTERVAL_MS + 800)
+    // Line 1 finishes typing, then a 300ms breath before line 2 starts
+    await wait(LINE_1.length * TYPE_INTERVAL_MS + 300)
     setLine2Active(true)
     // Line 2 finishes typing, an 800ms breath, then the intro fades out
     await wait(LINE_2.length * TYPE_INTERVAL_MS + 800)
@@ -321,6 +321,9 @@ export default function App() {
     // the 800ms fade-in actually transitions instead of snapping.
     await wait(20)
     setStoryShown(true)
+    // Let the stage finish fading in and settle for a beat before the
+    // narration audio starts (visuals/animations above are unaffected).
+    await wait(2000)
     playStory(selectedStory.id)
   }
 
