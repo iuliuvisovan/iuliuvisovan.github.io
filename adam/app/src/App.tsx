@@ -141,9 +141,13 @@ export default function App() {
   // Auto-collapse the mobile browser chrome on load: the document carries
   // 400px of extra scroll headroom (see html min-height in app.css), 200px
   // above and 200px below, so scrolling to 200 centers the page and lets it
-  // bleed edge-to-edge top and bottom without a manual swipe.
+  // bleed edge-to-edge top and bottom without a manual swipe. Mobile only:
+  // the headroom and body margin only exist under the 520px breakpoint, so on
+  // desktop there's nothing to scroll and we must not nudge the page.
   useEffect(() => {
-    window.scrollTo(0, 200)
+    if (window.matchMedia('(max-width: 520px)').matches) {
+      window.scrollTo(0, 200)
+    }
   }, [])
 
   const selectedStory = STORIES.find((story) => story.id === storyId) ?? STORIES[0]

@@ -20,28 +20,19 @@
    scrollbars or layout shift appear. */
 html {
   overflow: auto;
-  /* 400px of scroll headroom. body sits in flow with a 200px top margin, so
-     there's 200px of slack above it and 200px below; window.scrollTo(0, 200)
-     in App.tsx parks the viewport dead center on body. The leftover scroll
-     range is what lets iOS Safari's / Chrome's toolbars collapse so the artwork
-     bleeds edge-to-edge. Desktop: lvh = vh and there's no toolbar, harmless. */
-  min-height: calc(100lvh + 400px);
+  /* Desktop has no browser toolbar to collapse, so the document is just the
+     viewport height. The mobile-only override (see the @media block) adds the
+     400px of scroll headroom that powers the toolbar-collapse / full-bleed
+     trick together with body's margin-top and window.scrollTo(0, 200). */
+  min-height: 100dvh;
 }
 
 body {
-  /* In normal flow (a fixed full-viewport body swallows the scroll gesture, so
-     the toolbars never collapse). The html has 400px of scroll headroom; this
-     200px top margin pushes body down so 200px of slack sits above it and 200px
-     below. window.scrollTo(0, 200) in App.tsx then lands the viewport dead
-     center on body, keeping the layout centered exactly as before. */
-  margin-top: 200px;
   width: 100%;
   height: 100vh;
   /* Dynamic viewport so content centers under mobile URL bars */
   height: 100dvh;
-  margin-right: 0;
-  margin-bottom: 0;
-  margin-left: 0;
+  margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -162,7 +153,8 @@ body::before {
 .intro-text {
   font-family: "Baloo 2", sans-serif;
   font-weight: 400;
-  font-size: clamp(2.6rem, 8vw, 9.2rem);
+  /* Mobile sits on the 2.6rem floor; the cap keeps desktop from ballooning */
+  font-size: clamp(2.6rem, 6vw, 4.5rem);
   line-height: 1.1;
   white-space: nowrap;
   text-align: center;
@@ -236,6 +228,13 @@ body::before {
   padding-top: 50px;
   /* clears the floating pause button so the last line can scroll above it */
   padding-bottom: 60px;
+}
+
+/* Desktop gets more breathing room above the first line */
+@media (min-width: 521px) {
+  .story-text {
+    padding-top: 100px;
+  }
 }
 
 /* One story paragraph. Layout-only: the narration highlight is the
@@ -418,6 +417,19 @@ body::before {
 /* ========== MOBILE ========== */
 
 @media (max-width: 520px) {
+  /* Full-bleed / toolbar-collapse trick, mobile only. The document gets 400px
+     of scroll headroom and body is pushed down 200px, so 200px of slack sits
+     above and below it. window.scrollTo(0, 200) on load (App.tsx, also mobile
+     only) parks the viewport centered, and the leftover scroll range lets the
+     browser toolbars collapse so the artwork bleeds edge-to-edge. */
+  html {
+    min-height: calc(100lvh + 400px);
+  }
+
+  body {
+    margin-top: 200px;
+  }
+
   /* Bottom fade band shifted ~50px up so text dissolves above the controls;
      top edge keeps the desktop fade. Overriding the stage property retunes
      the scroller and the glass pill together. */
