@@ -128,7 +128,22 @@ export default function App() {
   const [paused, setPaused] = useState(false)
   const [voicePaused, setVoicePaused] = useState(false)
   const [musicPaused, setMusicPaused] = useState(false)
-  const [storyId, setStoryId] = useState(() => STORIES[Math.floor(Math.random() * STORIES.length)].id)
+  const [storyId, setStoryId] = useState(() => {
+    // Random story on each page load, but never the same as the previous load
+    // (remembered in localStorage), so a reload always visibly changes the
+    // story instead of occasionally repeating.
+    let last = 0
+    try {
+      last = Number(localStorage.getItem('adam:last-story')) || 0
+    } catch {}
+    const pool = STORIES.filter((story) => story.id !== last)
+    const choices = pool.length > 0 ? pool : STORIES
+    const pick = choices[Math.floor(Math.random() * choices.length)].id
+    try {
+      localStorage.setItem('adam:last-story', String(pick))
+    } catch {}
+    return pick
+  })
   // Index of the narration chunk currently speaking; its paragraph gets the
   // highlight. Null before playback and after stopNarration.
   const [activeChunk, setActiveChunk] = useState<number | null>(null)
