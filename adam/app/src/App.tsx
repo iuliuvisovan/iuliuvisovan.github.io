@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import tellMe from './assets/tellme.png'
 import { startLullaby } from './lullaby'
-import { playSparkles } from './sparkles'
 import { playWriting } from './writing'
 import { startNarration, primeVoice, pauseStoryAudio, resumeStoryAudio, pauseVoice, resumeVoice, pauseMusic, resumeMusic } from './narration'
 import { STORIES } from './stories'
@@ -321,7 +320,6 @@ export default function App() {
     // Bless the voice element inside the tap gesture so the delayed narration
     // (it starts seconds later) can still play on iOS.
     primeVoice(selectedStory.id)
-    playSparkles()
     setButtonFading(true)
     await wait(1400)
     await wait(500)
