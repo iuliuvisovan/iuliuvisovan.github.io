@@ -390,7 +390,7 @@ export default function App() {
                 onClick={() => selectStory(story.id)}
                 aria-label={`Povestea ${story.id}`}
               >
-                {story.id}
+                {story.emoji}
               </button>
             ))}
           </div>

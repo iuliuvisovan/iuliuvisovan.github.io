@@ -1,14 +1,17 @@
-// Bedtime stories for Adam. 5 stories, 6 paragraphs each.
+// Bedtime stories for Adam. 6 stories, 6 paragraphs each.
 // Narration chunking happens elsewhere; here we keep only the raw content.
 
 export type Story = {
   id: number
+  // Shown on the story-picker button
+  emoji: string
   paragraphs: string[]
 }
 
 export const STORIES: Story[] = [
   {
     id: 1,
+    emoji: '⭐',
     paragraphs: [
       'A fost odată, ca niciodată, o luminiță mică, ce a coborât din cer într-o seară liniștită, când luna se vedea la geam. Bebe Adam s-a trezit, a clipit încet, iar luminița stătea chiar pe păturica lui, de parcă o stea venise în camera lui.',
       'Luminița s-a rostogolit încet până lângă mânuța lui și a clipit de două ori. Din ușă a venit mama, zâmbind. „Uite, Adam, avem un musafir mic.”',
@@ -20,6 +23,7 @@ export const STORIES: Story[] = [
   },
   {
     id: 2,
+    emoji: '🎈',
     paragraphs: [
       'A fost odată, ca niciodată, o umbră mică și rotundă, care a apărut într-o dimineață liniștită pe marginea perdelei. Bebe Adam stătea în pătuțul lui, iar umbra se legăna ușor, ca un balon care venise să-l salute.',
       'Tata a intrat încet în cameră și s-a uitat și el spre perdea. „Uite, Adam, o văd și eu.” Umbra s-a ascuns o clipă după perdea, apoi a ieșit din nou, ca și cum voia să se joace de-a v-ați ascunselea.',
@@ -31,6 +35,7 @@ export const STORIES: Story[] = [
   },
   {
     id: 3,
+    emoji: '💧',
     paragraphs: [
       'A fost odată, ca niciodată, o picătură mică de apă, ce s-a așezat pe geam într-o dimineață liniștită. Bebe Adam stătea în pătuț și se uita la ea. Picătura cobora încet pe sticlă, ca și cum mergea la plimbare.',
       'Picătura s-a oprit la mijlocul geamului și a strălucit puțin. A venit mama și a zâmbit. „Uite, Adam, e o picătură curioasă.”',
@@ -42,6 +47,7 @@ export const STORIES: Story[] = [
   },
   {
     id: 4,
+    emoji: '🍼',
     paragraphs: [
       'A fost odată, ca niciodată, un băiețel pe nume Adam, care stătea în pătuț într-o seară liniștită și privea spre ușă. Din bucătărie se auzea un sunet mic, ca un pahar pus încet pe masă.',
       'A venit tata și s-a așezat lângă el. În cameră mirosea curat și cald, iar Adam știa că undeva aproape se pregătea ceva bun. Tata a zâmbit: „Uite, Adam, vine imediat.”',
@@ -53,6 +59,7 @@ export const STORIES: Story[] = [
   },
   {
     id: 5,
+    emoji: '🌙',
     paragraphs: [
       'A fost odată, ca niciodată, o lumină mică și rotundă, care a apărut pe perete într-o seară liniștită. Bebe Adam stătea în pătuț și se uita la ea. Lumina se mișca încet ori de câte ori perdeaua se legăna.',
       'A venit tata și a tras perdeaua puțin mai bine. Lumina nu a dispărut de tot, doar s-a făcut mai mică. „Uite, Adam, încă e aici. Dar și ea se pregătește de nani.”',
@@ -60,6 +67,19 @@ export const STORIES: Story[] = [
       'Adam a deschis ochii mari, de parcă spunea „nu, încă nu.” Tata a zâmbit și l-a ținut puțin mai aproape. Nu era grabă. Nani venea încet, ca un musafir blând.',
       'După papa, bebe Adam a început să clipească tot mai rar. Lumina de pe perete cobora încet, păturica stătea cuminte, iar camera părea că respiră foarte încet.',
       'Când ochișorii lui Adam s-au închis, tata a șoptit: „nani, bebe.” Lumina mică a făcut un ultim semn, ca un „pa”, apoi camera a rămas liniștită până dimineață. Și totul a fost bine.',
+    ],
+  },
+  {
+    // Jack și vrejul de fasole (Joseph Jacobs), retold gently for bedtime
+    id: 6,
+    emoji: '🌱',
+    paragraphs: [
+      'A fost odată, ca niciodată, un băiețel pe nume Jack, care locuia cu mama lui într-o căsuță mică de la marginea satului. Erau săraci, iar într-o zi mama i-a spus încet: „Jack, trebuie să vindem văcuța noastră, ca să avem ce mânca.”',
+      'Pe drumul spre târg, Jack a întâlnit un om cu o punguță de boabe de fasole colorate. „Sunt boabe fermecate”, a spus omul. Jack a dat văcuța pe boabe și a fugit bucuros acasă. Dar mama s-a supărat și a aruncat boabele pe fereastră, în grădină.',
+      'Dimineața, în fața geamului se înălța un vrej uriaș de fasole, care urca până sus, deasupra norilor. Jack s-a cățărat pe el ca pe o scară, tot mai sus, până a ajuns într-o țară din cer, unde a găsit un castel mare cât un munte.',
+      'În castel locuia un uriaș care avea o găinușă ce făcea ouă de aur. Când uriașul a adormit și a început să sforăie ca un tunet blând, Jack a luat găinușa în brațe, ușurel, și a pornit în vârful picioarelor înapoi spre vrej.',
+      'Uriașul s-a trezit și a pornit greoi după el, dar Jack cobora repede, repede. Jos, a tăiat vrejul, iar acesta s-a lăsat încet la pământ, ca o funie moale. Uriașul a rămas sus, în țara lui din nori, și de atunci nu a mai coborât niciodată.',
+      'Găinușa a făcut ouă de aur, iar Jack și mama lui nu au mai dus lipsă de nimic. Seara, Jack s-a cuibărit în pătuțul lui, mama i-a șoptit „nani”, iar deasupra căsuței stelele au clipit încet, ca și cum le-ar fi spus: noapte bună.',
     ],
   },
 ]

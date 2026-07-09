@@ -5,7 +5,7 @@
 //   node scripts/regen-audio.mjs 2              regenerate all 6 chunks of story 2
 //   node scripts/regen-audio.mjs 2 1            regenerate only chunk 1 of story 2
 //
-// Stories live in src/stories.ts (5 stories, 6 paragraphs each). Narration is
+// Stories live in src/stories.ts (6 stories, 6 paragraphs each). Narration is
 // chunked as 1 paragraph per file: chunk N = paragraph N. Files are written to
 // public/audio/story-{storyId}-chunk-{chunk}.mp3 (both 1-based).
 //
@@ -16,7 +16,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
-const STORY_COUNT = 5
+const STORY_COUNT = 6
 const PARAGRAPHS_PER_STORY = 6
 const PARAGRAPHS_PER_CHUNK = 1
 const CHUNKS_PER_STORY = PARAGRAPHS_PER_STORY / PARAGRAPHS_PER_CHUNK
