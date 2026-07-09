@@ -1,4 +1,4 @@
-// Bedtime stories for Adam. 8 stories, 6 paragraphs each.
+// Bedtime stories for Adam. 6 stories, 6 paragraphs each.
 // Narration chunking happens elsewhere; here we keep only the raw content.
 
 export type Story = {
@@ -23,18 +23,6 @@ export const STORIES: Story[] = [
   },
   {
     id: 2,
-    emoji: '☀️',
-    paragraphs: [
-      'A fost odată, ca niciodată, o umbră mică și rotundă, care a apărut într-o dimineață liniștită pe marginea perdelei. Bebe Adam stătea în pătuțul lui, iar umbra se legăna ușor, ca un balon care venise să-l salute.',
-      'Tata a intrat încet în cameră și s-a uitat și el spre perdea. „Uite, Adam, o văd și eu.” Umbra s-a ascuns o clipă după perdea, apoi a ieșit din nou, ca și cum voia să se joace de-a v-ați ascunselea.',
-      'Tata a luat un pahar cu apă și l-a pus pe noptieră. Balonul de umbră s-a oglindit în apă și, deodată, Adam a văzut că nu era o umbră, ci o bulină de lumină rătăcită.',
-      'Tata a vrut să deschidă geamul ca bulina să plece afară, dar Adam a scos un sunet mic: „nu”. Tata a zâmbit și a spus: „Bine, mai stă puțin cu noi.”',
-      'După papa, Adam s-a liniștit, iar bulina de lumină s-a plimbat pe perete până a ajuns lângă pătuț. Tata i-a arătat-o cu degetul: „Uite, Adam, te păzește.”',
-      'Când a venit vremea de nani, tata l-a învelit ușor pe Adam. Bulina s-a ridicat spre perdea, a clipit o dată, ca un „pa” mic, apoi a dispărut în lumina dimineții. Iar bebe a închis ochii și a intrat în vis.',
-    ],
-  },
-  {
-    id: 3,
     emoji: '💧',
     paragraphs: [
       'A fost odată, ca niciodată, o picătură mică de apă, ce s-a așezat pe geam într-o dimineață liniștită. Bebe Adam stătea în pătuț și se uita la ea. Picătura cobora încet pe sticlă, ca și cum mergea la plimbare.',
@@ -46,7 +34,7 @@ export const STORIES: Story[] = [
     ],
   },
   {
-    id: 4,
+    id: 3,
     emoji: '🍼',
     paragraphs: [
       'A fost odată, ca niciodată, un băiețel pe nume Adam, care stătea în pătuț într-o seară liniștită și privea spre ușă. Din bucătărie se auzea un sunet mic, ca un pahar pus încet pe masă.',
@@ -58,20 +46,8 @@ export const STORIES: Story[] = [
     ],
   },
   {
-    id: 5,
-    emoji: '🌙',
-    paragraphs: [
-      'A fost odată, ca niciodată, o lumină mică și rotundă, care a apărut pe perete într-o seară liniștită. Bebe Adam stătea în pătuț și se uita la ea. Lumina se mișca încet ori de câte ori perdeaua se legăna.',
-      'A venit tata și a tras perdeaua puțin mai bine. Lumina nu a dispărut de tot, doar s-a făcut mai mică. „Uite, Adam, încă e aici. Dar și ea se pregătește de nani.”',
-      'Pe noptieră era un pahar cu apă, iar lângă pătuț era o păturică așezată frumos. Camera devenea tot mai liniștită, ca și cum toate lucrurile știau că vine somnul.',
-      'Adam a deschis ochii mari, de parcă spunea „nu, încă nu.” Tata a zâmbit și l-a ținut puțin mai aproape. Nu era grabă. Nani venea încet, ca un musafir blând.',
-      'După papa, bebe Adam a început să clipească tot mai rar. Lumina de pe perete cobora încet, păturica stătea cuminte, iar camera părea că respiră foarte încet.',
-      'Când ochișorii lui Adam s-au închis, tata a șoptit: „nani, bebe.” Lumina mică a făcut un ultim semn, ca un „pa”, apoi camera a rămas liniștită până dimineață. Și totul a fost bine.',
-    ],
-  },
-  {
     // Jack și vrejul de fasole (Joseph Jacobs), retold gently for bedtime
-    id: 6,
+    id: 4,
     emoji: '🌱',
     paragraphs: [
       'A fost odată, ca niciodată, un băiețel pe nume Jack, care locuia cu mama lui într-o căsuță mică de la marginea satului. Nu aveau prea multe: o masă, două scaune și o vatră în care focul ardea încet. În curte pășea o văcuță blândă, pe nume Alba, care le dădea în fiecare dimineață lapte cald. Dar într-o zi laptele s-a împuținat, cămara a rămas goală, iar mama s-a așezat lângă Jack și i-a spus încet: „Puiul meu, trebuie să vindem văcuța noastră la târg, ca să avem ce mânca.” Jack a mângâiat văcuța pe frunte, i-a șoptit „pa, Alba”, apoi a pornit cu ea la drum, pe cărarea care șerpuia printre dealuri verzi.',
@@ -84,7 +60,7 @@ export const STORIES: Story[] = [
   },
   {
     // Punguța cu doi bani (Ion Creangă), retold gently for bedtime
-    id: 7,
+    id: 5,
     emoji: '🐓',
     paragraphs: [
       'A fost odată, ca niciodată, un moș și o babă care locuiau într-o căsuță mică, cu gard de nuiele și o curte plină de flori. Baba avea o găinușă harnică, ce făcea în fiecare zi câte două ouă, iar moșul avea un cocoș falnic, cu pene arămii și creastă roșie. Într-o zi, moșul i-a cerut babei un ou, ca să-și potolească foamea, dar baba nu a vrut să-i dea niciunul. Atunci moșul a oftat și i-a spus cocoșului său: „Cocoșule, du-te și tu în lumea largă și adu-ne ceva, că tare săraci mai suntem.” Cocoșul a bătut o dată din aripi, a cântat „cucurigu!” și a pornit la drum, pe cărarea dintre dealuri.',
@@ -98,7 +74,7 @@ export const STORIES: Story[] = [
   {
     // Punguța cu doi bani (Ion Creangă), the original text, dialogue folded
     // into quotes so each chunk stays a single flowing paragraph
-    id: 8,
+    id: 6,
     emoji: '🐔',
     paragraphs: [
       'Era odată o babă și un moșneag. Baba avea o găină, și moșneagul un cucoș; găina babei se oua de câte două ori pe fiecare zi și baba mânca o mulțime de ouă; iar moșneagului nu-i da nici unul. Moșneagul într-o zi perdu răbdarea și zise: „Măi babă, mănânci ca în târgul lui Cremene. Ia dă-mi și mie niște ouă, ca să-mi prind pofta măcar.” „Da’ cum nu!”, zise baba, care era foarte zgârcită. „Dacă ai poftă de ouă, bate și tu cucoșul tău, să facă ouă, și-i mânca; că eu așa am bătut găina, și iacătă-o cum se ouă.” Moșneagul, pofticios și hapsin, se ia după gura babei și, de ciudă, prinde iute și degrabă cucoșul și-i dă o bataie bună, zicând: „Na! ori te ouă, ori du-te de la casa mea; ca să nu mai strici mâncarea degeaba.”',
