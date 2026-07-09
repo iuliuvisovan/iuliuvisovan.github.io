@@ -257,7 +257,10 @@ export default function App() {
     const top = paragraph.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop - 120
     container.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' })
     placeGlassPill()
-  }, [activeChunk])
+    // storyId is a dep because switching stories can leave activeChunk at the
+    // same index (0 -> 0): the paragraphs re-render with new text but the
+    // effect would not re-run, leaving the pill sized for the old paragraph.
+  }, [activeChunk, storyId])
 
   function playStory(id: number) {
     setStoryId(id)

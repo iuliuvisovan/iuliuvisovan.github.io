@@ -266,12 +266,12 @@ body::before {
   pointer-events: none;
   box-sizing: border-box;
   border-radius: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.7);
   background: linear-gradient(
     -75deg,
-    rgba(255, 255, 255, 0.4),
     rgba(255, 255, 255, 0.6),
-    rgba(255, 255, 255, 0.4)
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.6)
   );
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -448,6 +448,15 @@ body::before {
      which lands inside the ~47-59px notch zone on full-bleed iPhones. */
   .story-picker {
     top: calc(-24px + env(safe-area-inset-top));
+    /* 8 buttons at 48px + 12px gaps are 468px, wider than a phone; 38px
+       buttons with 8px gaps come to 360px, inside a 375px screen */
+    gap: 8px;
+  }
+
+  .story-picker-button {
+    width: 38px;
+    height: 38px;
+    font-size: 17px;
   }
 
   /* Audio controls need extra clearance below them on a phone */
