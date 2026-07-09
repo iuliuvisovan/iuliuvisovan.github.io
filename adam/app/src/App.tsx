@@ -324,10 +324,10 @@ export default function App() {
     // (it starts seconds later) can still play on iOS.
     primeVoice(selectedStory.id)
     setButtonFading(true)
-    await wait(1400)
-    await wait(500)
+    // Just the quick button fade (matches the 400ms opacity transition),
+    // then the writing starts right away
+    await wait(400)
     playWriting()
-    await wait(500)
     startLullaby()
     setPhase('intro')
     await wait(20)

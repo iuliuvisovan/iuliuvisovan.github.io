@@ -111,7 +111,7 @@ body::before {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  transition: scale var(--anim--hover-time) var(--anim--hover-ease), opacity 1400ms ease;
+  transition: scale var(--anim--hover-time) var(--anim--hover-ease), opacity 400ms ease;
 }
 
 @media (hover: hover) {
