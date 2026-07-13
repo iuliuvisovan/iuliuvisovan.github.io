@@ -74,7 +74,7 @@ export const STORIES: Story[] = [
   {
     // Albă ca Zăpada și cei șapte pitici (Frații Grimm), retold gently for bedtime
     id: 6,
-    emoji: '🍎',
+    emoji: '❄️',
     paragraphs: [
       'A fost odată, ca niciodată, o fetiță frumoasă pe nume Albă ca Zăpada, cu pielea albă ca zăpada proaspătă, cu părul negru ca pana corbului și cu obrajii rumeni ca merele coapte. Ea locuia într-un castel mare, unde regina, mama ei vitregă, avea o oglindă fermecată. În fiecare dimineață, regina o întreba: „Oglindă, oglinjoară, cine e cea mai frumoasă din țară?”, iar oglinda îi răspundea: „Tu, regina mea.” Dar într-o zi, oglinda a spus cu glas limpede: „Frumoasă ești, regină, dar Albă ca Zăpada e de o mie de ori mai frumoasă.” Regina s-a încruntat și s-a supărat atât de tare, încât inima ei s-a făcut rece ca gheața.',
       'Regina a chemat un vânător și i-a poruncit să o ducă pe Albă ca Zăpada departe, în adâncul pădurii. Dar vânătorul avea inimă bună: când au ajuns între copaci, i-a șoptit fetiței: „Fugi, copilă, și găsește-ți un loc unde să fii în siguranță.” Albă ca Zăpada a mers prin pădure toată ziua, printre brazi înalți și ferigi moi. Păsărelele îi cântau de sus, o căprioară blândă a condus-o pe cărare, iar veverițele îi arătau drumul sărind din creangă în creangă. Când soarele cobora spre asfințit, fetița a zărit într-o poiană o căsuță mică de tot, cu acoperiș roșu și ferestre cât palma. A bătut încet la ușă, dar nu a răspuns nimeni, așa că a intrat tiptil.',
