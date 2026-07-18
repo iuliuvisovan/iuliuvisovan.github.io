@@ -241,7 +241,7 @@ export function resumeMusic() {
 // scripts/regen-audio.mjs. File names use 1-based chunk numbers.
 // The mp3s are served with a 4-hour cache; bump AUDIO_VERSION whenever audio
 // is regenerated so cached clients fetch the new takes immediately.
-const AUDIO_VERSION = 2
+const AUDIO_VERSION = 3
 
 function chunkUrl(storyId: number, index: number) {
   return `${import.meta.env.BASE_URL}audio/story-${storyId}-chunk-${index + 1}.mp3?v=${AUDIO_VERSION}`

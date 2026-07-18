@@ -22,15 +22,16 @@ export const STORIES: Story[] = [
     ],
   },
   {
+    // Ursul păcălit de vulpe (Ion Creangă), retold gently for bedtime
     id: 2,
-    emoji: '💧',
+    emoji: '🐻',
     paragraphs: [
-      'A fost odată, ca niciodată, o picătură mică de apă, ce s-a așezat pe geam într-o dimineață liniștită. Bebe Adam stătea în pătuț și se uita la ea. Picătura cobora încet pe sticlă, ca și cum mergea la plimbare.',
-      'Picătura s-a oprit la mijlocul geamului și a strălucit puțin. A venit mama și a zâmbit. „Uite, Adam, e o picătură curioasă.”',
-      'Apoi a venit tata cu un pahar mic de apă. A pus paharul lângă pătuț, iar lumina din cameră s-a oglindit în el. Adam a privit apa cum tremura ușor, ca o mică mare într-un pahar.',
-      'Picătura de pe geam părea că vrea să intre la Adam. Dar vântul a mișcat perdeaua, iar Adam a scos un sunet mic, de parcă spunea: „nu”. Tata a închis geamul încet, ca să fie bine și cald.',
-      'După papa, mama i-a șters gurița lui Adam cu grijă. Picătura de pe geam a coborât până jos și a dispărut, dar în pahar apa încă sclipea liniștit lângă el.',
-      'Când a venit vremea de nani, tata a făcut „pa” cu mâna spre geam, iar mama l-a ținut pe Adam aproape. Bebe a închis ochișorii, iar apa din pahar a rămas acolo cuminte, păzind camera în tăcere. Iar în casă s-a făcut liniște, cald și bine.',
+      'A fost odată, ca niciodată, o vulpe tare șireată, cu blană roșcată și coadă stufoasă, care locuia într-o vizuină la marginea pădurii. Într-o seară de iarnă, îi era foame și a ieșit la drum, să caute ceva de mâncare. Deodată a auzit un scârțâit de roți: venea un țăran de la baltă, cu carul plin de pește proaspăt. Vulpea a avut îndată o idee isteață: s-a întins în mijlocul drumului și a rămas nemișcată, de parcă dormea adânc. Țăranul a oprit carul, s-a uitat la ea și a zis: „Ia te uită, ce vulpe frumoasă! O iau cu mine în car.” Și a așezat-o binișor peste peștii din car, apoi a pornit mai departe, fluierând.',
+      'Cum mergea carul încetișor pe drum, vulpea a deschis un ochi, apoi pe celălalt. A luat binișor un pește și l-a aruncat pe drum: pleosc! Apoi încă unul și încă unul, până a făcut o cărare întreagă de peștișori argintii. La urmă, hop! a sărit și ea din car, fără să facă niciun zgomot. A adunat peștii unul câte unul, i-a dus în vizuina ei și s-a așezat la masă, mulțumită. Când a ajuns țăranul acasă și s-a uitat în car, nu mai era nici vulpea, nici o bună parte din pești. S-a scărpinat în cap și a zâmbit: „Măi, să fie! Tare șireată vulpe!”',
+      'Tocmai atunci a trecut pe lângă vizuină ursul, mare și greoi, cu blana lui cafenie. A adulmecat aerul: mmm, mirosea a pește proaspăt! „Bună seara, cumătră vulpe. Da de unde ai tu atâta peștișor bun?” a întrebat el cu glas gros. Vulpea a zâmbit pe sub mustăți: „L-am pescuit chiar eu, cumetre ursule, din balta din pădure. E tare ușor: te duci la copcă, bagi coada în apă și stai liniștit, fără să te miști deloc. Peștii se prind singuri de coadă, iar dimineața îi tragi afară pe toți odată.” Ursul a dat din cap bucuros: „Mulțumesc, cumătră! Chiar în noaptea asta mă duc și eu la pescuit.”',
+      'Ursul a pornit greoi prin zăpadă, pas cu pas, până la balta înghețată. A găsit o copcă mică în gheață, s-a așezat binișor pe marginea ei și și-a băgat coada în apa rece. Apoi a stat cuminte, așa cum îl învățase vulpea, fără să se miște deloc. Luna strălucea deasupra pădurii, fulgi mici de nea cădeau încet, iar ursul aștepta răbdător și se gândea: „Să se prindă cât mai mulți peștișori!” Dar noaptea era geroasă, iar apa din copcă a înghețat încetișor în jurul cozii lui, fără ca el să bage de seamă.',
+      'Când s-au ivit zorile, ursul a zis vesel: „Gata, acum trag peștii afară!” A tras o dată: nimic. A tras mai tare: gheața îi ținea coada strâns. A tras atunci cu toată puterea lui de urs și, deodată, s-a pomenit cu coada scurtă, cât un pămătuf: restul rămăsese prins în gheață. De atunci au urșii coada scurtă. Din vizuina ei, vulpea a chicotit încetișor, iar ursul a mormăit: „M-ai păcălit, cumătră!” Apoi a scuturat zăpada de pe blană și a pornit spre bârlogul lui, zicându-și că de acum înainte va fi mai înțelept.',
+      'Iarna și-a văzut mai departe de drum, cu zăpezi moi și seri liniștite. Ursul s-a cuibărit în bârlogul lui cald, pe un pat de frunze și mușchi moale, și a dormit dulce tot restul iernii, visând la faguri de miere. Vulpea s-a încolăcit în vizuina ei, cu coada stufoasă drept păturică, sătulă și mulțumită. Peste pădure ningea încetișor, fulg cu fulg, iar balta dormea și ea sub plapuma ei de gheață. Totul era liniștit, cald și bine. Iar deasupra pădurii, stelele au clipit încet, ca și cum le-ar fi spus tuturor: noapte bună.',
     ],
   },
   {
